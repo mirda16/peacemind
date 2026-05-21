@@ -7,6 +7,7 @@ import StylePanel from './components/StylePanel';
 import ExportDialog from './components/ExportDialog';
 import ContextMenu from './components/ContextMenu';
 import { useFileOps } from './hooks/useFileOps';
+import SearchBar from './components/SearchBar';
 
 interface CtxMenu {
   x: number;
@@ -20,10 +21,17 @@ export default function App() {
   const isDirty = useMindMapStore((s) => s.isDirty);
   const sketchMode = useMindMapStore((s) => s.sketchMode);
 
+  const setSearchQuery = useMindMapStore((s) => s.setSearchQuery);
   const { saveMap, openMap } = useFileOps();
 
   const [showExport, setShowExport] = useState(false);
   const [ctxMenu, setCtxMenu] = useState<CtxMenu | null>(null);
+  const [showSearch, setShowSearch] = useState(false);
+
+  const closeSearch = () => {
+    setShowSearch(false);
+    setSearchQuery('');
+  };
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -51,6 +59,10 @@ export default function App() {
         e.preventDefault();
         setShowExport(true);
       }
+      if (e.key === 'f') {
+        e.preventDefault();
+        setShowSearch(true);
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -66,8 +78,9 @@ export default function App() {
       <div className={sketchMode ? 'pm-sketch-mode' : undefined} style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
         <Toolbar onShowExport={() => setShowExport(true)} />
 
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
           <MindMapCanvas onContextMenu={handleContextMenu} />
+          {showSearch && <SearchBar onClose={closeSearch} />}
           <StylePanel />
         </div>
       </div>

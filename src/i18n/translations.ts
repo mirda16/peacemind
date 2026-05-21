@@ -9,6 +9,10 @@ export interface Translations {
     zoomIn: string; zoomOut: string; fitView: string;
     confirmNew: string; confirmOpen: string;
     layout: string; layoutLR: string; layoutRL: string; layoutTB: string; layoutBT: string; layoutRadial: string;
+    search: string;
+  };
+  search: {
+    placeholder: string; noResults: string; resultOf: string;
   };
   contextMenu: {
     addChild: string; addSibling: string; editText: string;
@@ -52,6 +56,10 @@ const en: Translations = {
     confirmOpen: 'Map has unsaved changes. Open another?',
     layout: 'Auto layout', layoutLR: 'Left → Right', layoutRL: 'Right → Left',
     layoutTB: 'Top → Bottom', layoutBT: 'Bottom → Top', layoutRadial: 'Radial',
+    search: 'Search (Ctrl+F)',
+  },
+  search: {
+    placeholder: 'Search nodes…', noResults: 'No results', resultOf: 'of',
   },
   contextMenu: {
     addChild: 'Add child', addSibling: 'Add sibling', editText: 'Edit text',
@@ -136,6 +144,10 @@ const cs: Translations = {
     confirmOpen: 'Mapa má neuložené změny. Přesto otevřít jinou?',
     layout: 'Auto rozložení', layoutLR: 'Zleva doprava', layoutRL: 'Zprava doleva',
     layoutTB: 'Shora dolů', layoutBT: 'Zdola nahoru', layoutRadial: 'Radiálně',
+    search: 'Hledat (Ctrl+F)',
+  },
+  search: {
+    placeholder: 'Hledat uzly…', noResults: 'Žádné výsledky', resultOf: 'z',
   },
   contextMenu: {
     addChild: 'Přidat potomka', addSibling: 'Přidat sourozence', editText: 'Upravit text',

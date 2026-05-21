@@ -111,6 +111,11 @@ body,
   outline-color: var(--pm-accent);
 }
 
+.pm-node.search-match {
+  outline-color: #f59e0b;
+  outline-width: 2px;
+}
+
 .pm-node input,
 .pm-node textarea {
   background: transparent;

@@ -97,6 +97,9 @@ function MindMapNode({ id, data, selected }: NodeProps) {
   } = d;
 
   const editingNodeId    = useMindMapStore((s) => s.editingNodeId);
+  const searchResultIds  = useMindMapStore((s) => s.searchResultIds);
+  const searchQuery      = useMindMapStore((s) => s.searchQuery);
+  const isSearchMatch    = searchQuery.trim() !== '' && searchResultIds.includes(id);
   const setEditingNodeId = useMindMapStore((s) => s.setEditingNodeId);
   const updateNodeLabel  = useMindMapStore((s) => s.updateNodeLabel);
   const pushHistory      = useMindMapStore((s) => s.pushHistory);
@@ -181,7 +184,7 @@ function MindMapNode({ id, data, selected }: NodeProps) {
 
   return (
     <div
-      className={`pm-node${selected ? ' selected' : ''}`}
+      className={`pm-node${selected ? ' selected' : ''}${isSearchMatch ? ' search-match' : ''}`}
       style={shapeStyle}
       onDoubleClick={handleDoubleClick}
     >

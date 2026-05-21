@@ -52,6 +52,8 @@ interface MindMapState {
   currentStyleId: string;
   showNotes: boolean;
   sketchMode: boolean;
+  searchQuery: string;
+  searchResultIds: string[];
 
   // Flow callbacks
   onNodesChange: (changes: NodeChange[]) => void;
@@ -91,6 +93,9 @@ interface MindMapState {
 
   // Notes
   toggleShowNotes: () => void;
+
+  // Search
+  setSearchQuery: (query: string) => void;
 
   // Edge defaults
   setDefaultEdgeData: (data: Partial<MindMapEdgeData>) => void;
@@ -184,6 +189,8 @@ export const useMindMapStore = create<MindMapState>()(
     currentStyleId: 'klasicky',
     showNotes: false,
     sketchMode: false,
+    searchQuery: '',
+    searchResultIds: [],
 
     onNodesChange: (changes) => {
       set((state) => {
@@ -406,6 +413,22 @@ export const useMindMapStore = create<MindMapState>()(
     toggleTheme: () => set((state) => { state.theme = state.theme === 'light' ? 'dark' : 'light'; }),
     setLanguage: (lang) => set((state) => { state.language = lang; }),
     toggleShowNotes: () => set((state) => { state.showNotes = !state.showNotes; }),
+
+    setSearchQuery: (query) => set((state) => {
+      state.searchQuery = query;
+      if (!query.trim()) {
+        state.searchResultIds = [];
+        return;
+      }
+      const q = query.toLowerCase();
+      state.searchResultIds = state.nodes
+        .filter((n) => {
+          const label = String((n.data as Record<string, unknown>).label ?? '').toLowerCase();
+          const notes = String((n.data as Record<string, unknown>).notes ?? '').toLowerCase();
+          return label.includes(q) || notes.includes(q);
+        })
+        .map((n) => n.id);
+    }),
 
     setDefaultEdgeData: (data) => {
       set((state) => { Object.assign(state.defaultEdgeData, data); });
