@@ -7,6 +7,7 @@ import StylePanel from './components/StylePanel';
 import ExportDialog from './components/ExportDialog';
 import ContextMenu from './components/ContextMenu';
 import { useFileOps } from './hooks/useFileOps';
+import { useAutoSave } from './hooks/useAutoSave';
 import SearchBar from './components/SearchBar';
 
 interface CtxMenu {
@@ -22,6 +23,7 @@ export default function App() {
   const sketchMode = useMindMapStore((s) => s.sketchMode);
 
   const setSearchQuery = useMindMapStore((s) => s.setSearchQuery);
+  useAutoSave();
   const { saveMap, openMap } = useFileOps();
 
   const [showExport, setShowExport] = useState(false);
