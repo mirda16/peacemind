@@ -2,6 +2,7 @@ import { open, save } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { PeaceMindFile } from '../types/mindmap';
 import { useMindMapStore } from '../store/useMindMapStore';
+import { pushRecentFile } from './useRecentFiles';
 
 export function useFileOps() {
   const store = useMindMapStore();
@@ -34,6 +35,7 @@ export function useFileOps() {
       await invoke<void>('write_file', { path: filePath, content: JSON.stringify(data, null, 2) });
       store.setCurrentFilePath(filePath);
       store.setIsDirty(false);
+      pushRecentFile({ path: filePath, title: mapTitle, savedAt: new Date().toISOString() });
       return true;
     } catch (e) {
       console.error('Save failed:', e);
@@ -54,6 +56,7 @@ export function useFileOps() {
       store.loadMap(data.nodes, data.edges, data.title, data.theme);
       if (data.styleId) store.applyStylePreset(data.styleId);
       store.setCurrentFilePath(filePath);
+      pushRecentFile({ path: filePath, title: data.title, savedAt: data.updatedAt });
       return true;
     } catch (e) {
       console.error('Open failed:', e);

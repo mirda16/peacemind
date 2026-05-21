@@ -9,7 +9,7 @@ export interface Translations {
     zoomIn: string; zoomOut: string; fitView: string;
     confirmNew: string; confirmOpen: string;
     layout: string; layoutLR: string; layoutRL: string; layoutTB: string; layoutBT: string; layoutRadial: string;
-    search: string;
+    search: string; recent: string; noRecent: string; removeRecent: string;
   };
   search: {
     placeholder: string; noResults: string; resultOf: string;
@@ -56,7 +56,7 @@ const en: Translations = {
     confirmOpen: 'Map has unsaved changes. Open another?',
     layout: 'Auto layout', layoutLR: 'Left → Right', layoutRL: 'Right → Left',
     layoutTB: 'Top → Bottom', layoutBT: 'Bottom → Top', layoutRadial: 'Radial',
-    search: 'Search (Ctrl+F)',
+    search: 'Search (Ctrl+F)', recent: 'Recent', noRecent: 'No recent files', removeRecent: 'Remove from list',
   },
   search: {
     placeholder: 'Search nodes…', noResults: 'No results', resultOf: 'of',
@@ -144,7 +144,7 @@ const cs: Translations = {
     confirmOpen: 'Mapa má neuložené změny. Přesto otevřít jinou?',
     layout: 'Auto rozložení', layoutLR: 'Zleva doprava', layoutRL: 'Zprava doleva',
     layoutTB: 'Shora dolů', layoutBT: 'Zdola nahoru', layoutRadial: 'Radiálně',
-    search: 'Hledat (Ctrl+F)',
+    search: 'Hledat (Ctrl+F)', recent: 'Nedávné', noRecent: 'Žádné nedávné soubory', removeRecent: 'Odebrat ze seznamu',
   },
   search: {
     placeholder: 'Hledat uzly…', noResults: 'Žádné výsledky', resultOf: 'z',

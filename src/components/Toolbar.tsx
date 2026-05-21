@@ -10,6 +10,7 @@ import { useFileOps } from '../hooks/useFileOps';
 import { useT } from '../i18n';
 import { LayoutDirection } from '../utils/autoLayout';
 import KeyboardHelp from './KeyboardHelp';
+import RecentFilesMenu from './RecentFilesMenu';
 
 interface Props {
   onShowExport: () => void;
@@ -101,6 +102,10 @@ export default function Toolbar({ onShowExport }: Props) {
       <button className="pm-toolbar-btn" onClick={handleOpen} title={t.toolbar.openTooltip}>
         <FolderOpen size={16} /> <span>{t.toolbar.open}</span>
       </button>
+      <RecentFilesMenu onConfirmDirty={() => {
+        if (!isDirty) return true;
+        return confirm(t.toolbar.confirmOpen);
+      }} />
       <button className="pm-toolbar-btn" onClick={() => saveMap()} title={t.toolbar.saveTooltip}>
         <Save size={16} /> <span>{t.toolbar.save}</span>
       </button>
