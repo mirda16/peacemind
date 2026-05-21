@@ -1,12 +1,14 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import {
   FilePlus, FolderOpen, Save, Download, Undo2, Redo2,
   Sun, Moon, ZoomIn, ZoomOut, Maximize2, BoxSelect, Type, Square, Circle, StickyNote,
+  LayoutDashboard,
 } from 'lucide-react';
 import { useMindMapStore } from '../store/useMindMapStore';
 import { useFileOps } from '../hooks/useFileOps';
 import { useT } from '../i18n';
+import { LayoutDirection } from '../utils/autoLayout';
 import KeyboardHelp from './KeyboardHelp';
 
 interface Props {
@@ -33,6 +35,25 @@ export default function Toolbar({ onShowExport }: Props) {
   const addFreeShape   = useMindMapStore((s) => s.addFreeShape);
   const showNotes      = useMindMapStore((s) => s.showNotes);
   const toggleShowNotes = useMindMapStore((s) => s.toggleShowNotes);
+  const autoLayout     = useMindMapStore((s) => s.autoLayout);
+
+  const [layoutOpen, setLayoutOpen] = useState(false);
+  const layoutRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!layoutOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (layoutRef.current && !layoutRef.current.contains(e.target as Node)) setLayoutOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [layoutOpen]);
+
+  const applyLayout = (dir: LayoutDirection) => {
+    autoLayout(dir);
+    setLayoutOpen(false);
+    setTimeout(() => fitView({ duration: 400, padding: 0.3 }), 50);
+  };
 
   const { saveMap, openMap } = useFileOps();
   const { fitView, zoomIn, zoomOut, screenToFlowPosition } = useReactFlow();
@@ -136,6 +157,44 @@ export default function Toolbar({ onShowExport }: Props) {
       >
         <StickyNote size={16} />
       </button>
+
+      <div className="pm-toolbar-sep" />
+
+      {/* Auto layout */}
+      <div ref={layoutRef} style={{ position: 'relative' }}>
+        <button
+          className={`pm-toolbar-btn${layoutOpen ? ' active' : ''}`}
+          onClick={() => setLayoutOpen((o) => !o)}
+          title={t.toolbar.layout}
+        >
+          <LayoutDashboard size={16} /> <span>{t.toolbar.layout}</span>
+        </button>
+        {layoutOpen && (
+          <div style={{
+            position: 'absolute', top: '100%', left: 0, marginTop: 4,
+            background: 'var(--pm-surface)', border: '1px solid var(--pm-border)',
+            borderRadius: 8, padding: 4, boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+            zIndex: 1000, minWidth: 170,
+          }}>
+            {([
+              ['LR',     '→ ' + t.toolbar.layoutLR],
+              ['RL',     '← ' + t.toolbar.layoutRL],
+              ['TB',     '↓ ' + t.toolbar.layoutTB],
+              ['BT',     '↑ ' + t.toolbar.layoutBT],
+              ['radial', '⊕ ' + t.toolbar.layoutRadial],
+            ] as [LayoutDirection, string][]).map(([dir, label]) => (
+              <button
+                key={dir}
+                className="pm-context-item"
+                style={{ width: '100%', textAlign: 'left', fontSize: 13 }}
+                onClick={() => applyLayout(dir)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="pm-toolbar-sep" />
 

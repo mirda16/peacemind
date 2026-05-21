@@ -8,6 +8,7 @@ export interface Translations {
     newTooltip: string; openTooltip: string; saveTooltip: string;
     zoomIn: string; zoomOut: string; fitView: string;
     confirmNew: string; confirmOpen: string;
+    layout: string; layoutLR: string; layoutRL: string; layoutTB: string; layoutBT: string; layoutRadial: string;
   };
   contextMenu: {
     addChild: string; addSibling: string; editText: string;
@@ -49,6 +50,8 @@ const en: Translations = {
     zoomIn: 'Zoom in', zoomOut: 'Zoom out', fitView: 'Fit view (Ctrl+0)',
     confirmNew: 'Map has unsaved changes. Create new anyway?',
     confirmOpen: 'Map has unsaved changes. Open another?',
+    layout: 'Auto layout', layoutLR: 'Left → Right', layoutRL: 'Right → Left',
+    layoutTB: 'Top → Bottom', layoutBT: 'Bottom → Top', layoutRadial: 'Radial',
   },
   contextMenu: {
     addChild: 'Add child', addSibling: 'Add sibling', editText: 'Edit text',
@@ -131,6 +134,8 @@ const cs: Translations = {
     zoomIn: 'Přiblížit', zoomOut: 'Oddálit', fitView: 'Zobrazit vše (Ctrl+0)',
     confirmNew: 'Mapa má neuložené změny. Přesto vytvořit novou?',
     confirmOpen: 'Mapa má neuložené změny. Přesto otevřít jinou?',
+    layout: 'Auto rozložení', layoutLR: 'Zleva doprava', layoutRL: 'Zprava doleva',
+    layoutTB: 'Shora dolů', layoutBT: 'Zdola nahoru', layoutRadial: 'Radiálně',
   },
   contextMenu: {
     addChild: 'Přidat potomka', addSibling: 'Přidat sourozence', editText: 'Upravit text',

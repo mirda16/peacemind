@@ -25,6 +25,7 @@ import {
 } from '../types/mindmap';
 import { getT, type Lang } from '../i18n';
 import { MAP_STYLE_PRESETS } from '../types/styles';
+import { computeLayout, LayoutDirection } from '../utils/autoLayout';
 
 type MindNode = Node<MindMapNodeData>;
 type MindEdge = Edge<MindMapEdgeData>;
@@ -108,6 +109,9 @@ interface MindMapState {
   // Copy & detach
   detachFromParent: (nodeId: string) => void;
   copyNode: (nodeId: string, withSubtree: boolean) => string | null;
+
+  // Auto layout
+  autoLayout: (direction: LayoutDirection) => void;
 }
 
 // ---------- helpers ----------
@@ -601,6 +605,16 @@ export const useMindMapStore = create<MindMapState>()(
       });
       get().pushHistory();
       return idMap.get(nodeId) ?? null;
+    },
+
+    autoLayout: (direction) => {
+      const { nodes, edges } = get();
+      const laid = computeLayout(nodes, edges, direction);
+      set((state) => {
+        state.nodes = laid as MindNode[];
+        state.isDirty = true;
+      });
+      get().pushHistory();
     },
   }))
 );
