@@ -46,6 +46,7 @@ export interface PeaceMindFile {
   edges: import('@xyflow/react').Edge<MindMapEdgeData>[];
   viewport: { x: number; y: number; zoom: number };
   theme: 'light' | 'dark';
+  styleId?: string;
   createdAt: string;
   updatedAt: string;
 }

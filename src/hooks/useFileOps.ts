@@ -7,7 +7,7 @@ export function useFileOps() {
   const store = useMindMapStore();
 
   const saveMap = async (forceSaveAs = false): Promise<boolean> => {
-    const { nodes, edges, mapTitle, theme, currentFilePath } = useMindMapStore.getState();
+    const { nodes, edges, mapTitle, theme, currentFilePath, currentStyleId } = useMindMapStore.getState();
     let filePath = currentFilePath;
 
     if (!filePath || forceSaveAs) {
@@ -25,6 +25,7 @@ export function useFileOps() {
       edges,
       viewport: useMindMapStore.getState().viewport,
       theme,
+      styleId: currentStyleId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -51,6 +52,7 @@ export function useFileOps() {
       const raw = await invoke<string>('read_file', { path: filePath });
       const data: PeaceMindFile = JSON.parse(raw);
       store.loadMap(data.nodes, data.edges, data.title, data.theme);
+      if (data.styleId) store.applyStylePreset(data.styleId);
       store.setCurrentFilePath(filePath);
       return true;
     } catch (e) {
