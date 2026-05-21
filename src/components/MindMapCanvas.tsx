@@ -49,7 +49,7 @@ export default function MindMapCanvas({ onContextMenu }: Props) {
   const redo = useMindMapStore((s) => s.redo);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const { fitView } = useReactFlow();
+  const { fitView, setCenter, getZoom } = useReactFlow();
 
   // Refocus canvas after finishing node edit so keyboard shortcuts (Enter, Tab) work again
   useEffect(() => {
@@ -133,8 +133,44 @@ export default function MindMapCanvas({ onContextMenu }: Props) {
         setSelectedNodeIds([]);
         return;
       }
+
+      if (['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        e.preventDefault();
+        const { nodes: allNodes, edges: allEdges } = useMindMapStore.getState();
+
+        const navigateTo = (targetId: string) => {
+          setSelectedNodeIds([targetId]);
+          const target = allNodes.find((n) => n.id === targetId);
+          if (target) {
+            const x = target.position.x + (target.measured?.width ?? 160) / 2;
+            const y = target.position.y + (target.measured?.height ?? 48) / 2;
+            setCenter(x, y, { duration: 300, zoom: getZoom() });
+          }
+        };
+
+        if (e.key === 'ArrowRight') {
+          const child = allEdges.find((ed) => ed.source === primaryId);
+          if (child) navigateTo(child.target);
+        }
+        if (e.key === 'ArrowLeft') {
+          const parent = allEdges.find((ed) => ed.target === primaryId);
+          if (parent) navigateTo(parent.source);
+        }
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          const parentEdge = allEdges.find((ed) => ed.target === primaryId);
+          if (parentEdge) {
+            const siblings = allEdges
+              .filter((ed) => ed.source === parentEdge.source)
+              .map((ed) => ed.target);
+            const idx = siblings.indexOf(primaryId);
+            const nextIdx = e.key === 'ArrowDown' ? idx + 1 : idx - 1;
+            if (nextIdx >= 0 && nextIdx < siblings.length) navigateTo(siblings[nextIdx]);
+          }
+        }
+        return;
+      }
     },
-    [editingNodeId, addChildNode, addSiblingNode, deleteNode, setEditingNodeId, setSelectedNodeIds, undo, redo, fitView]
+    [editingNodeId, addChildNode, addSiblingNode, deleteNode, setEditingNodeId, setSelectedNodeIds, undo, redo, fitView, setCenter, getZoom]
   );
 
   const handleNodeContextMenu = useCallback(

@@ -340,7 +340,10 @@ export const useMindMapStore = create<MindMapState>()(
       get().pushHistory();
     },
 
-    setSelectedNodeIds: (ids) => set((state) => { state.selectedNodeIds = ids; }),
+    setSelectedNodeIds: (ids) => set((state) => {
+      state.selectedNodeIds = ids;
+      state.nodes.forEach((n) => { n.selected = ids.includes(n.id); });
+    }),
     setEditingNodeId: (id) => set((state) => { state.editingNodeId = id; }),
 
     pushHistory: () => {

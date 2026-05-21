@@ -5,7 +5,6 @@ export type LayoutDirection = 'LR' | 'RL' | 'TB' | 'BT' | 'radial';
 
 const DEFAULT_W = 160;
 const DEFAULT_H = 48;
-const NODE_GAP = 60;
 const RING_RADIUS = 220;
 
 export function computeLayout(nodes: Node[], edges: Edge[], direction: LayoutDirection): Node[] {
@@ -66,9 +65,7 @@ function computeRadialLayout(nodes: Node[], edges: Edge[]): Node[] {
     const parentPos = positions[id];
     const isRoot = outwardAngle === null;
 
-    const CHILD_ARC = (130 * Math.PI) / 180; // 130° for non-root nodes
-    // Root uses full 360°; all other nodes use 130° arc facing away from root
-    const totalArc = isRoot ? 2 * Math.PI : CHILD_ARC;
+    const CHILD_ARC = (130 * Math.PI) / 180;
 
     const radius = isRoot ? RING_RADIUS : 200;
 
