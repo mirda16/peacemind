@@ -174,8 +174,8 @@ function NodeStyleSection() {
     { id: 'rounded',   label: t.shapes.rounded },
     { id: 'rectangle', label: t.shapes.rectangle },
     { id: 'ellipse',   label: t.shapes.ellipse },
-    { id: 'diamond',   label: t.shapes.diamond },
-    { id: 'hexagon',   label: t.shapes.hexagon },
+    { id: 'circle',    label: t.shapes.circle },
+    { id: 'pill',      label: t.shapes.pill },
   ];
 
   const update = useCallback(

@@ -1,4 +1,4 @@
-export type NodeShape = 'rectangle' | 'rounded' | 'ellipse' | 'diamond' | 'hexagon';
+export type NodeShape = 'rectangle' | 'rounded' | 'ellipse' | 'circle' | 'pill';
 export type EdgeType = 'smoothstep' | 'bezier' | 'straight' | 'step';
 
 export interface ChecklistItem {

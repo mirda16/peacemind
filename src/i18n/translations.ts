@@ -24,7 +24,7 @@ export interface Translations {
     checklist: string; clearChecklist: string; addChecklistItem: string;
     nodeEdges: string; customColor: string; imageFilter: string;
   };
-  shapes: { rounded: string; rectangle: string; ellipse: string; diamond: string; hexagon: string };
+  shapes: { rounded: string; rectangle: string; ellipse: string; circle: string; pill: string };
   help: { title: string; shortcuts: { keys: string[]; desc: string }[] };
   exportDialog: {
     title: string;
@@ -71,7 +71,7 @@ const en: Translations = {
   },
   shapes: {
     rounded: '⬜ Rounded', rectangle: '🔲 Rect', ellipse: '⭕ Ellipse',
-    diamond: '◆ Diamond', hexagon: '⬡ Hexagon',
+    circle: '● Circle', pill: '💊 Pill',
   },
   help: {
     title: 'Keyboard shortcuts',
@@ -153,7 +153,7 @@ const cs: Translations = {
   },
   shapes: {
     rounded: '⬜ Oblé', rectangle: '🔲 Rect', ellipse: '⭕ Elipsa',
-    diamond: '◆ Kosoč.', hexagon: '⬡ Šesti.',
+    circle: '● Kruh', pill: '💊 Pilulka',
   },
   help: {
     title: 'Klávesové zkratky',

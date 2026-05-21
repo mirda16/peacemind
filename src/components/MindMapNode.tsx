@@ -6,15 +6,16 @@ import { useT } from '../i18n';
 
 // ---------- shape styles ----------
 
-function getShapeStyle(shape: NodeShape, bg: string, borderColor: string, borderWidth: number): React.CSSProperties {
+function getShapeStyle(shape: NodeShape, bg: string, borderColor: string, borderWidth: number, sketchMode = false): React.CSSProperties {
   const base: React.CSSProperties = { background: bg, border: `${borderWidth}px solid ${borderColor}`, boxSizing: 'border-box' };
+  const sketchRadius = sketchMode ? { borderRadius: '255px 15px 225px 15px / 15px 225px 15px 255px' } : {};
   switch (shape) {
-    case 'rectangle':  return { ...base, borderRadius: 4 };
-    case 'rounded':    return { ...base, borderRadius: 12 };
-    case 'ellipse':    return { ...base, borderRadius: '50%', minWidth: 100, minHeight: 50 };
-    case 'diamond':    return { ...base, borderRadius: 4, transform: 'rotate(45deg)' };
-    case 'hexagon':    return { ...base, borderRadius: 4, clipPath: 'polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%)', border: 'none', outline: `${borderWidth}px solid ${borderColor}` };
-    default:           return { ...base, borderRadius: 12 };
+    case 'rectangle': return { ...base, borderRadius: 4, ...sketchRadius };
+    case 'rounded':   return { ...base, borderRadius: 12, ...sketchRadius };
+    case 'ellipse':   return { ...base, borderRadius: '50%', minWidth: 100, minHeight: 50 };
+    case 'circle':    return { ...base, borderRadius: '50%', minWidth: 80, minHeight: 80, aspectRatio: '1 / 1' };
+    case 'pill':      return { ...base, borderRadius: 9999, ...sketchRadius };
+    default:          return { ...base, borderRadius: 12, ...sketchRadius };
   }
 }
 
@@ -104,11 +105,11 @@ function MindMapNode({ id, data, selected }: NodeProps) {
   const updateNodeData   = useMindMapStore((s) => s.updateNodeData);
   const edges            = useMindMapStore((s) => s.edges);
   const showNotes        = useMindMapStore((s) => s.showNotes);
+  const sketchMode       = useMindMapStore((s) => s.sketchMode);
 
   const isNoteShown = noteVisible ?? showNotes;
   const hasChildren = edges.some((e) => e.source === id);
   const isEditing = editingNodeId === id;
-  const isDiamond = shape === 'diamond';
 
   const [editValue, setEditValue] = useState(label as string);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -166,15 +167,13 @@ function MindMapNode({ id, data, selected }: NodeProps) {
     });
   }, [id, d, updateNodeData]);
 
-  const shapeStyle = getShapeStyle(shape as NodeShape, backgroundColor as string, borderColor as string, borderWidth as number);
-  const isDiamondInner: React.CSSProperties = isDiamond ? { transform: 'rotate(-45deg)' } : {};
+  const shapeStyle = getShapeStyle(shape as NodeShape, backgroundColor as string, borderColor as string, borderWidth as number, sketchMode);
 
   const textStyle: React.CSSProperties = {
     color: textColor as string,
     fontSize: fontSize as number,
     fontWeight: fontWeight as string,
     fontStyle: fontStyle as string,
-    ...isDiamondInner,
   };
 
   const checkedCount = checklist?.filter((i) => i.checked).length ?? 0;
@@ -197,7 +196,7 @@ function MindMapNode({ id, data, selected }: NodeProps) {
       )}
 
       {/* Header: icon + label + note toggle */}
-      <div className="pm-node-header" style={isDiamondInner}>
+      <div className="pm-node-header">
         {icon && <span className="pm-node-icon">{icon as string}</span>}
         {isEditing ? (
           <textarea
@@ -230,7 +229,7 @@ function MindMapNode({ id, data, selected }: NodeProps) {
 
       {/* Note */}
       {isNoteShown && (
-        <div className="pm-note" style={isDiamondInner} onClick={(e) => e.stopPropagation()}>
+        <div className="pm-note" onClick={(e) => e.stopPropagation()}>
           <textarea
             className="pm-note-textarea"
             value={(notes as string) || ''}
@@ -245,7 +244,7 @@ function MindMapNode({ id, data, selected }: NodeProps) {
 
       {/* Checklist */}
       {checklist && checklist.length > 0 && (
-        <div className="pm-checklist" style={isDiamondInner} onClick={(e) => e.stopPropagation()}>
+        <div className="pm-checklist" onClick={(e) => e.stopPropagation()}>
           {totalCount > 0 && (
             <div style={{ fontSize: 10, color: textColor as string, opacity: 0.6, marginBottom: 2 }}>
               {checkedCount}/{totalCount}

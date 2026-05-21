@@ -353,7 +353,6 @@ body,
 /* ── Sketch / Excalidraw style ───────────────────────────────── */
 .pm-sketch-mode .pm-node {
   font-family: 'Segoe Print', 'Bradley Hand', 'Comic Sans MS', cursive !important;
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.12) !important;
 }
 
