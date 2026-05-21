@@ -42,6 +42,25 @@ function getBorderPoint(
   return { x: bx, y: by, pos };
 }
 
+// Border point for ellipse: solves (x/hw)^2 + (y/hh)^2 = 1 along direction (dx,dy)
+function getEllipseBorderPoint(
+  cx: number, cy: number, hw: number, hh: number,
+  dx: number, dy: number
+): BorderPt {
+  const len = Math.sqrt(dx * dx + dy * dy) || 1;
+  const ndx = dx / len;
+  const ndy = dy / len;
+  const denom = Math.sqrt((ndx / hw) ** 2 + (ndy / hh) ** 2) || 1e-6;
+  const t = 1 / denom;
+  const bx = cx + ndx * t;
+  const by = cy + ndy * t;
+  const pos: Position =
+    Math.abs(dx) * hh > Math.abs(dy) * hw
+      ? dx > 0 ? Position.Right : Position.Left
+      : dy > 0 ? Position.Bottom : Position.Top;
+  return { x: bx, y: by, pos };
+}
+
 interface SmartPts {
   sx: number; sy: number; srcPos: Position;
   tx: number; ty: number; tgtPos: Position;
@@ -52,6 +71,7 @@ type NodeForEdge = {
   position: { x: number; y: number };
   measured?: { width?: number; height?: number };
   parentId?: string;
+  data?: { shape?: string };
 };
 
 function getAbsolutePos(nodeId: string, nodes: NodeForEdge[]): { x: number; y: number } {
@@ -90,8 +110,12 @@ function getSmartPoints(
   const dx = tcx - scx;
   const dy = tcy - scy;
 
-  const sp = getBorderPoint(scx, scy, sw / 2, sh / 2, dx, dy);
-  const tp = getBorderPoint(tcx, tcy, tw / 2, th / 2, -dx, -dy);
+  const sShape = sNode.data?.shape;
+  const tShape = tNode.data?.shape;
+  const borderFn = (isEllipse: boolean) => isEllipse ? getEllipseBorderPoint : getBorderPoint;
+
+  const sp = borderFn(sShape === 'ellipse')(scx, scy, sw / 2, sh / 2, dx, dy);
+  const tp = borderFn(tShape === 'ellipse')(tcx, tcy, tw / 2, th / 2, -dx, -dy);
 
   // Inset both endpoints slightly inside their node so the edge hides under the node body
   const dist = Math.sqrt(dx * dx + dy * dy) || 1;
