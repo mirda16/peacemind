@@ -310,7 +310,6 @@ body,
   padding: 0 2px;
   opacity: 0.25;
   flex-shrink: 0;
-  transition: opacity 0.15s;
 }
 
 .pm-note-btn.has-note {
