@@ -178,7 +178,7 @@ export default function MindMapCanvas({ onContextMenu }: Props) {
         onPaneContextMenu={handlePaneContextMenu}
         onMoveEnd={(_, viewport) => setViewport(viewport)}
         fitView
-        fitViewOptions={{ padding: 0.3 }}
+        fitViewOptions={{ padding: 0.3, maxZoom: 0.75 }}
         minZoom={0.05}
         maxZoom={5}
         elevateNodesOnSelect={false}
