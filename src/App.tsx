@@ -18,6 +18,7 @@ export default function App() {
   const theme = useMindMapStore((s) => s.theme);
   const newMap = useMindMapStore((s) => s.newMap);
   const isDirty = useMindMapStore((s) => s.isDirty);
+  const sketchMode = useMindMapStore((s) => s.sketchMode);
 
   const { saveMap, openMap } = useFileOps();
 
@@ -62,7 +63,7 @@ export default function App() {
 
   return (
     <ReactFlowProvider>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+      <div className={sketchMode ? 'pm-sketch-mode' : undefined} style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
         <Toolbar onShowExport={() => setShowExport(true)} />
 
         <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>

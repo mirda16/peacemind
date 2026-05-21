@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import {
   FilePlus, FolderOpen, Save, Download, Undo2, Redo2,
-  Sun, Moon, ZoomIn, ZoomOut, Maximize2, BoxSelect, Type, Square, Circle,
+  Sun, Moon, ZoomIn, ZoomOut, Maximize2, BoxSelect, Type, Square, Circle, StickyNote,
 } from 'lucide-react';
 import { useMindMapStore } from '../store/useMindMapStore';
 import { useFileOps } from '../hooks/useFileOps';
@@ -28,9 +28,11 @@ export default function Toolbar({ onShowExport }: Props) {
   const canRedo = useMindMapStore((s) => s.canRedo());
   const newMap = useMindMapStore((s) => s.newMap);
 
-  const addGroup     = useMindMapStore((s) => s.addGroup);
-  const addFreeText  = useMindMapStore((s) => s.addFreeText);
-  const addFreeShape = useMindMapStore((s) => s.addFreeShape);
+  const addGroup       = useMindMapStore((s) => s.addGroup);
+  const addFreeText    = useMindMapStore((s) => s.addFreeText);
+  const addFreeShape   = useMindMapStore((s) => s.addFreeShape);
+  const showNotes      = useMindMapStore((s) => s.showNotes);
+  const toggleShowNotes = useMindMapStore((s) => s.toggleShowNotes);
 
   const { saveMap, openMap } = useFileOps();
   const { fitView, zoomIn, zoomOut, screenToFlowPosition } = useReactFlow();
@@ -122,6 +124,17 @@ export default function Toolbar({ onShowExport }: Props) {
       </button>
       <button className="pm-toolbar-btn" onClick={() => addFreeShape('ellipse', insertCenter())} title={t.toolbar.insertEllipse}>
         <Circle size={16} />
+      </button>
+
+      <div className="pm-toolbar-sep" />
+
+      {/* Notes global toggle */}
+      <button
+        className={`pm-toolbar-btn${showNotes ? ' active' : ''}`}
+        onClick={toggleShowNotes}
+        title={t.toolbar.toggleNotes}
+      >
+        <StickyNote size={16} />
       </button>
 
       <div className="pm-toolbar-sep" />

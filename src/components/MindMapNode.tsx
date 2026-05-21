@@ -92,6 +92,7 @@ function MindMapNode({ id, data, selected }: NodeProps) {
   const {
     label, shape, backgroundColor, textColor, borderColor, borderWidth,
     fontSize, fontWeight, fontStyle, icon, imageData, collapsed, checklist,
+    notes, noteVisible,
   } = d;
 
   const editingNodeId    = useMindMapStore((s) => s.editingNodeId);
@@ -102,7 +103,9 @@ function MindMapNode({ id, data, selected }: NodeProps) {
   const toggleCollapse   = useMindMapStore((s) => s.toggleCollapse);
   const updateNodeData   = useMindMapStore((s) => s.updateNodeData);
   const edges            = useMindMapStore((s) => s.edges);
+  const showNotes        = useMindMapStore((s) => s.showNotes);
 
+  const isNoteShown = noteVisible ?? showNotes;
   const hasChildren = edges.some((e) => e.source === id);
   const isEditing = editingNodeId === id;
   const isDiamond = shape === 'diamond';
@@ -146,6 +149,15 @@ function MindMapNode({ id, data, selected }: NodeProps) {
     toggleCollapse(id);
   }, [id, toggleCollapse]);
 
+  const handleToggleNote = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    updateNodeData(id, { noteVisible: !isNoteShown });
+  }, [id, isNoteShown, updateNodeData]);
+
+  const handleNoteChange = useCallback((text: string) => {
+    updateNodeData(id, { notes: text });
+  }, [id, updateNodeData]);
+
   const addChecklistItem = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     const current = d.checklist ?? [];
@@ -184,7 +196,7 @@ function MindMapNode({ id, data, selected }: NodeProps) {
         <img src={imageData as string} className="pm-node-image" alt="" draggable={false} />
       )}
 
-      {/* Header: icon + label */}
+      {/* Header: icon + label + note toggle */}
       <div className="pm-node-header" style={isDiamondInner}>
         {icon && <span className="pm-node-icon">{icon as string}</span>}
         {isEditing ? (
@@ -207,7 +219,29 @@ function MindMapNode({ id, data, selected }: NodeProps) {
             )}
           </span>
         )}
+        <button
+          className={`pm-note-btn${notes ? ' has-note' : ''}`}
+          onClick={handleToggleNote}
+          title={t.node.toggleNote}
+        >
+          📝
+        </button>
       </div>
+
+      {/* Note */}
+      {isNoteShown && (
+        <div className="pm-note" style={isDiamondInner} onClick={(e) => e.stopPropagation()}>
+          <textarea
+            className="pm-note-textarea"
+            value={(notes as string) || ''}
+            onChange={(e) => handleNoteChange(e.target.value)}
+            onKeyDown={(e) => e.stopPropagation()}
+            placeholder={t.node.notePlaceholder}
+            rows={3}
+            style={{ color: textColor as string }}
+          />
+        </div>
+      )}
 
       {/* Checklist */}
       {checklist && checklist.length > 0 && (

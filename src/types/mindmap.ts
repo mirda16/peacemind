@@ -19,6 +19,7 @@ export interface MindMapNodeData {
   fontStyle: 'normal' | 'italic';
   isRoot?: boolean;
   notes?: string;
+  noteVisible?: boolean;
   icon?: string;
   imageData?: string;
   collapsed?: boolean;

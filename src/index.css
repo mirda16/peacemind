@@ -300,6 +300,67 @@ body,
   color: var(--pm-accent);
 }
 
+/* Note toggle button inside node header */
+.pm-note-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  padding: 0 2px;
+  opacity: 0.25;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.pm-note-btn.has-note {
+  opacity: 0.75;
+}
+
+.pm-node:hover .pm-note-btn,
+.pm-note-btn:hover {
+  opacity: 1;
+}
+
+/* Note textarea inside node */
+.pm-note {
+  margin-top: 6px;
+}
+
+.pm-note-textarea {
+  width: 100%;
+  min-width: 160px;
+  font-size: 11px;
+  font-family: inherit;
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  padding: 4px 6px;
+  resize: vertical;
+  outline: none;
+  line-height: 1.4;
+}
+
+.pm-note-textarea:focus {
+  border-color: var(--pm-accent);
+}
+
+.dark .pm-note-textarea {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ── Sketch / Excalidraw style ───────────────────────────────── */
+.pm-sketch-mode .pm-node {
+  font-family: 'Segoe Print', 'Bradley Hand', 'Comic Sans MS', cursive !important;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.12) !important;
+}
+
+.pm-sketch-mode .pm-node.selected {
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.12), 0 0 0 2px var(--pm-accent) !important;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

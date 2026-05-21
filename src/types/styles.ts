@@ -19,6 +19,8 @@ export interface MapStylePreset {
   levelColors: string[] | null;
   // Level-specific edge colors (null = use single edge.color)
   levelEdgeColors: string[] | null;
+  // Enables hand-drawn sketch rendering
+  sketchMode?: boolean;
 }
 
 export const MAP_STYLE_PRESETS: MapStylePreset[] = [
@@ -140,6 +142,37 @@ export const MAP_STYLE_PRESETS: MapStylePreset[] = [
     edge: { edgeType: 'bezier', color: '#a78bfa', width: 4, animated: false, variableWidth: false, tapered: false },
     levelColors: ['#7c3aed', '#db2777', '#ea580c', '#ca8a04', '#16a34a', '#0891b2'],
     levelEdgeColors: ['#a78bfa', '#f472b6', '#fb923c', '#facc15', '#4ade80', '#22d3ee'],
+  },
+
+  {
+    id: 'nakresleno',
+    name: 'Nakresleno',
+    icon: '✏️',
+    description: 'Ručně kreslený styl jako Excalidraw',
+    rootNode: {
+      shape: 'rounded',
+      backgroundColor: '#1e1e2e',
+      textColor: '#ffffff',
+      borderColor: '#1e1e2e',
+      borderWidth: 3,
+      fontSize: 16,
+      fontWeight: 'bold',
+      fontStyle: 'normal',
+    },
+    childNode: {
+      shape: 'rounded',
+      backgroundColor: '#fffef2',
+      textColor: '#1e1e2e',
+      borderColor: '#1e1e2e',
+      borderWidth: 2,
+      fontSize: 14,
+      fontWeight: 'normal',
+      fontStyle: 'normal',
+    },
+    edge: { edgeType: 'bezier', color: '#1e1e2e', width: 2, animated: false, variableWidth: false, tapered: false },
+    levelColors: null,
+    levelEdgeColors: null,
+    sketchMode: true,
   },
 
   {

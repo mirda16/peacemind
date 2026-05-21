@@ -348,6 +348,18 @@ function NodeStyleSection() {
       </div>
 
       <div className="pm-panel-section">
+        <SectionLabel>{t.node.noteLabel}</SectionLabel>
+        <textarea
+          className="pm-input"
+          rows={3}
+          value={(nodeData.notes as string) || ''}
+          onChange={(e) => update({ notes: e.target.value })}
+          placeholder={t.node.notePlaceholder}
+          style={{ resize: 'vertical', fontSize: 12 }}
+        />
+      </div>
+
+      <div className="pm-panel-section">
         <SectionLabel>{t.panel.nodeEdges}</SectionLabel>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
           {PRESET_COLORS.map((c) => (

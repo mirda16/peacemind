@@ -49,6 +49,8 @@ interface MindMapState {
   historyIndex: number;
   defaultEdgeData: MindMapEdgeData;
   currentStyleId: string;
+  showNotes: boolean;
+  sketchMode: boolean;
 
   // Flow callbacks
   onNodesChange: (changes: NodeChange[]) => void;
@@ -85,6 +87,9 @@ interface MindMapState {
   // Theme & language
   toggleTheme: () => void;
   setLanguage: (lang: Lang) => void;
+
+  // Notes
+  toggleShowNotes: () => void;
 
   // Edge defaults
   setDefaultEdgeData: (data: Partial<MindMapEdgeData>) => void;
@@ -173,6 +178,8 @@ export const useMindMapStore = create<MindMapState>()(
     historyIndex: 0,
     defaultEdgeData: { ...DEFAULT_EDGE_DATA },
     currentStyleId: 'klasicky',
+    showNotes: false,
+    sketchMode: false,
 
     onNodesChange: (changes) => {
       set((state) => {
@@ -391,6 +398,7 @@ export const useMindMapStore = create<MindMapState>()(
 
     toggleTheme: () => set((state) => { state.theme = state.theme === 'light' ? 'dark' : 'light'; }),
     setLanguage: (lang) => set((state) => { state.language = lang; }),
+    toggleShowNotes: () => set((state) => { state.showNotes = !state.showNotes; }),
 
     setDefaultEdgeData: (data) => {
       set((state) => { Object.assign(state.defaultEdgeData, data); });
@@ -426,6 +434,7 @@ export const useMindMapStore = create<MindMapState>()(
 
       set((state) => {
         state.currentStyleId = styleId;
+        state.sketchMode = preset.sketchMode ?? false;
 
         // Update default edge data
         Object.assign(state.defaultEdgeData, preset.edge);

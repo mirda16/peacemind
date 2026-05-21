@@ -4,7 +4,7 @@ export interface Translations {
   toolbar: {
     new: string; open: string; save: string; export: string;
     insertGroup: string; insertText: string; insertRect: string; insertRoundedRect: string; insertEllipse: string;
-    shortcuts: string; toggleTheme: string; renameHint: string;
+    shortcuts: string; toggleTheme: string; renameHint: string; toggleNotes: string;
     newTooltip: string; openTooltip: string; saveTooltip: string;
     zoomIn: string; zoomOut: string; fitView: string;
     confirmNew: string; confirmOpen: string;
@@ -33,7 +33,7 @@ export interface Translations {
     pdfTitle: string; pdfDesc: string;
     exportDone: string; exportFailed: string;
   };
-  node: { addChild: string; expand: string; collapse: string; newItem: string; addItem: string; remove: string };
+  node: { addChild: string; expand: string; collapse: string; newItem: string; addItem: string; remove: string; toggleNote: string; notePlaceholder: string; noteLabel: string };
   defaults: { rootLabel: string; newNode: string; mapTitle: string; freeText: string; group: string };
   presets: Record<string, { name: string; description: string }>;
 }
@@ -44,7 +44,7 @@ const en: Translations = {
     insertGroup: 'Group', insertText: 'Text', insertRect: 'Insert rectangle',
     insertRoundedRect: 'Insert rounded rectangle', insertEllipse: 'Insert ellipse',
     shortcuts: 'Keyboard shortcuts', toggleTheme: 'Toggle theme',
-    renameHint: 'Click to rename',
+    renameHint: 'Click to rename', toggleNotes: 'Show / hide all notes',
     newTooltip: 'New map (Ctrl+N)', openTooltip: 'Open (Ctrl+O)', saveTooltip: 'Save (Ctrl+S)',
     zoomIn: 'Zoom in', zoomOut: 'Zoom out', fitView: 'Fit view (Ctrl+0)',
     confirmNew: 'Map has unsaved changes. Create new anyway?',
@@ -106,6 +106,8 @@ const en: Translations = {
   node: {
     addChild: 'Add child (Tab)', expand: 'Expand', collapse: 'Collapse',
     newItem: 'New item', addItem: '+ Add item', remove: 'Remove',
+    toggleNote: 'Show / hide note', notePlaceholder: 'Add a note…',
+    noteLabel: 'Note',
   },
   defaults: { rootLabel: 'Main topic', newNode: 'New node', mapTitle: 'New map', freeText: 'Text', group: 'Group' },
   presets: {
@@ -113,6 +115,7 @@ const en: Translations = {
     organicky:     { name: 'Organic',       description: 'Thicker branches at root, thinner at leaves' },
     profesionalni: { name: 'Professional',  description: 'Angular nodes, right-angle lines' },
     bublinovy:     { name: 'Bubble',        description: 'Ellipses, rainbow colors per branch' },
+    nakresleno:    { name: 'Sketch',        description: 'Hand-drawn style like Excalidraw' },
     minimalista:   { name: 'Minimalist',    description: 'Clean lines, no borders, pastel' },
   },
 };
@@ -123,7 +126,7 @@ const cs: Translations = {
     insertGroup: 'Skupina', insertText: 'Text', insertRect: 'Vložit obdélník',
     insertRoundedRect: 'Vložit zaoblený obdélník', insertEllipse: 'Vložit elipsu',
     shortcuts: 'Klávesové zkratky', toggleTheme: 'Přepnout téma',
-    renameHint: 'Klikni pro přejmenování',
+    renameHint: 'Klikni pro přejmenování', toggleNotes: 'Zobrazit / skrýt všechny poznámky',
     newTooltip: 'Nová mapa (Ctrl+N)', openTooltip: 'Otevřít (Ctrl+O)', saveTooltip: 'Uložit (Ctrl+S)',
     zoomIn: 'Přiblížit', zoomOut: 'Oddálit', fitView: 'Zobrazit vše (Ctrl+0)',
     confirmNew: 'Mapa má neuložené změny. Přesto vytvořit novou?',
@@ -185,6 +188,8 @@ const cs: Translations = {
   node: {
     addChild: 'Přidat potomka (Tab)', expand: 'Rozbalit', collapse: 'Sbalit',
     newItem: 'Nová položka', addItem: '+ Přidat položku', remove: 'Odebrat',
+    toggleNote: 'Zobrazit / skrýt poznámku', notePlaceholder: 'Přidat poznámku…',
+    noteLabel: 'Poznámka',
   },
   defaults: { rootLabel: 'Hlavní téma', newNode: 'Nový uzel', mapTitle: 'Nová mapa', freeText: 'Text', group: 'Skupina' },
   presets: {
@@ -192,6 +197,7 @@ const cs: Translations = {
     organicky:     { name: 'Organický',      description: 'Větve silnější u kořene, tenčí u listů' },
     profesionalni: { name: 'Profesionální',  description: 'Hranaté uzly, pravoúhlé čáry' },
     bublinovy:     { name: 'Bublinový',      description: 'Elipsy, duhové barvy dle větve' },
+    nakresleno:    { name: 'Nakresleno',     description: 'Ručně kreslený styl jako Excalidraw' },
     minimalista:   { name: 'Minimalistický', description: 'Čisté linie, bez rámečků, pastelové' },
   },
 };
