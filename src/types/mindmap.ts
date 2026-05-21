@@ -20,6 +20,7 @@ export interface MindMapNodeData {
   isRoot?: boolean;
   notes?: string;
   noteVisible?: boolean;
+  url?: string;
   icon?: string;
   imageData?: string;
   collapsed?: boolean;

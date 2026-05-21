@@ -93,7 +93,7 @@ function MindMapNode({ id, data, selected }: NodeProps) {
   const {
     label, shape, backgroundColor, textColor, borderColor, borderWidth,
     fontSize, fontWeight, fontStyle, icon, imageData, collapsed, checklist,
-    notes, noteVisible,
+    notes, noteVisible, url,
   } = d;
 
   const editingNodeId    = useMindMapStore((s) => s.editingNodeId);
@@ -152,6 +152,13 @@ function MindMapNode({ id, data, selected }: NodeProps) {
     e.stopPropagation();
     toggleCollapse(id);
   }, [id, toggleCollapse]);
+
+  const handleOpenUrl = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!url) return;
+    const href = /^https?:\/\//i.test(url as string) ? (url as string) : `https://${url}`;
+    import('@tauri-apps/plugin-opener').then(({ openUrl }) => openUrl(href));
+  }, [url]);
 
   const handleToggleNote = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -220,6 +227,15 @@ function MindMapNode({ id, data, selected }: NodeProps) {
               </span>
             )}
           </span>
+        )}
+        {url && (
+          <button
+            className="pm-note-btn has-note"
+            onClick={handleOpenUrl}
+            title={t.node.openUrl}
+          >
+            🔗
+          </button>
         )}
         <button
           className={`pm-note-btn${notes ? ' has-note' : ''}`}

@@ -38,7 +38,7 @@ export interface Translations {
     pdfTitle: string; pdfDesc: string;
     exportDone: string; exportFailed: string;
   };
-  node: { addChild: string; expand: string; collapse: string; newItem: string; addItem: string; remove: string; toggleNote: string; notePlaceholder: string; noteLabel: string };
+  node: { addChild: string; expand: string; collapse: string; newItem: string; addItem: string; remove: string; toggleNote: string; notePlaceholder: string; noteLabel: string; urlLabel: string; urlPlaceholder: string; openUrl: string };
   defaults: { rootLabel: string; newNode: string; mapTitle: string; freeText: string; group: string };
   presets: Record<string, { name: string; description: string }>;
 }
@@ -118,7 +118,7 @@ const en: Translations = {
     addChild: 'Add child (Tab)', expand: 'Expand', collapse: 'Collapse',
     newItem: 'New item', addItem: '+ Add item', remove: 'Remove',
     toggleNote: 'Show / hide note', notePlaceholder: 'Add a note…',
-    noteLabel: 'Note',
+    noteLabel: 'Note', urlLabel: 'URL link', urlPlaceholder: 'https://…', openUrl: 'Open URL',
   },
   defaults: { rootLabel: 'Main topic', newNode: 'New node', mapTitle: 'New map', freeText: 'Text', group: 'Group' },
   presets: {
@@ -206,7 +206,7 @@ const cs: Translations = {
     addChild: 'Přidat potomka (Tab)', expand: 'Rozbalit', collapse: 'Sbalit',
     newItem: 'Nová položka', addItem: '+ Přidat položku', remove: 'Odebrat',
     toggleNote: 'Zobrazit / skrýt poznámku', notePlaceholder: 'Přidat poznámku…',
-    noteLabel: 'Poznámka',
+    noteLabel: 'Poznámka', urlLabel: 'URL odkaz', urlPlaceholder: 'https://…', openUrl: 'Otevřít URL',
   },
   defaults: { rootLabel: 'Hlavní téma', newNode: 'Nový uzel', mapTitle: 'Nová mapa', freeText: 'Text', group: 'Skupina' },
   presets: {

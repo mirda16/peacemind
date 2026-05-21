@@ -360,6 +360,18 @@ function NodeStyleSection() {
       </div>
 
       <div className="pm-panel-section">
+        <SectionLabel>{t.node.urlLabel}</SectionLabel>
+        <input
+          className="pm-input"
+          type="url"
+          value={(nodeData.url as string) || ''}
+          onChange={(e) => update({ url: e.target.value || undefined })}
+          placeholder={t.node.urlPlaceholder}
+          style={{ fontSize: 12 }}
+        />
+      </div>
+
+      <div className="pm-panel-section">
         <SectionLabel>{t.panel.nodeEdges}</SectionLabel>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
           {PRESET_COLORS.map((c) => (
