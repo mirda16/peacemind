@@ -183,10 +183,13 @@ body,
   color: var(--pm-text-muted);
   visibility: hidden;
   z-index: 10;
+  transition: visibility 0s 0.4s;
 }
 
-.pm-node:hover .pm-node-collapse {
+.pm-node:hover .pm-node-collapse,
+.pm-node-collapse:hover {
   visibility: visible;
+  transition-delay: 0s;
 }
 
 
