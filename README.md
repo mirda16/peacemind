@@ -18,42 +18,41 @@ A desktop mind mapping application built with Tauri v2, React, and React Flow. C
 
 ## Running from source
 
-### Prerequisites
+### Prerequisites — Windows
 
-| Tool | Version | Link |
-|------|---------|------|
-| Node.js | 18 or newer | https://nodejs.org |
-| Rust + Cargo | stable | https://rustup.rs |
-| Tauri CLI dependencies | see below | |
+1. **Install Node.js** — download the LTS installer from https://nodejs.org and run it (leave all options at default).
 
-**Linux — install system dependencies (Ubuntu/Debian):**
+2. **Install Rust** — download `rustup-init.exe` from https://rustup.rs, run it, press `1` (default install) and Enter. **Restart your PC** after it finishes.
+
+### Prerequisites — Linux (Ubuntu/Debian)
+
+1. **Install Node.js** — https://nodejs.org (LTS)
+
+2. **Install Rust** — https://rustup.rs
+
+3. **Install system dependencies:**
 ```bash
 sudo apt update
 sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev patchelf
 ```
 
-**Windows** — no extra system dependencies needed beyond Node.js and Rust.
-
 ---
 
-### Setup
+### Setup & run
 
 ```bash
-# 1. Clone the repository
+# 1. Clone the repository (or download and extract the ZIP from GitHub)
 git clone https://github.com/mirda16/peacemind.git
 cd peacemind
 
-# 2. Install JavaScript dependencies
+# 2. Install JavaScript dependencies (takes ~1 minute)
 npm install
-```
 
-### Run in development mode
-
-```bash
+# 3. Start the app
 npm run tauri dev
 ```
 
-This opens the app with hot-reload. Changes to frontend files are reflected instantly.
+> **Note:** The first run compiles the Rust backend which takes **5–10 minutes**. Subsequent runs are much faster.
 
 ### Build a release binary
 
