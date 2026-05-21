@@ -35,6 +35,14 @@ fn read_image_as_data_url(path: String) -> Result<String, String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Disable WebKitGTK GPU compositing on Linux — prevents EGL_BAD_PARAMETER
+    // crash on systems where EGL display initialization fails (Wayland/Arch etc.)
+    #[cfg(target_os = "linux")]
+    {
+        std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+    }
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
