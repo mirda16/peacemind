@@ -35,10 +35,11 @@ fn read_image_as_data_url(path: String) -> Result<String, String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // Disable WebKitGTK GPU compositing on Linux — prevents EGL_BAD_PARAMETER
-    // crash on systems where EGL display initialization fails (Wayland/Arch etc.)
+    // Force XWayland + disable GPU compositing on Linux to prevent EGL_BAD_PARAMETER
+    // crash in WebKitGTK on Wayland (KDE/GNOME) and systems without working EGL.
     #[cfg(target_os = "linux")]
     {
+        std::env::set_var("GDK_BACKEND", "x11");
         std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
         std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
     }
