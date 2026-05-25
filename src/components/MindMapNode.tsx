@@ -87,7 +87,7 @@ function ChecklistItemRow({ item, nodeId, textColor }: ItemRowProps) {
 
 // ---------- main node ----------
 
-function MindMapNode({ id, data, selected }: NodeProps) {
+function MindMapNode({ id, data, selected, width }: NodeProps) {
   const t = useT();
   const d = data as MindMapNodeData;
   const {
@@ -117,12 +117,24 @@ function MindMapNode({ id, data, selected }: NodeProps) {
   const [editValue, setEditValue] = useState(label as string);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  const autoResizeTextarea = useCallback((el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }, []);
+
   useEffect(() => {
     if (isEditing) {
       setEditValue(label as string);
-      setTimeout(() => { inputRef.current?.focus(); inputRef.current?.select(); }, 10);
+      setTimeout(() => {
+        const el = inputRef.current;
+        if (!el) return;
+        el.focus();
+        el.select();
+        autoResizeTextarea(el);
+      }, 10);
     }
-  }, [isEditing, label]);
+  }, [isEditing, label, autoResizeTextarea]);
 
   const commitEdit = useCallback(() => {
     const trimmed = editValue.trim();
@@ -212,11 +224,15 @@ function MindMapNode({ id, data, selected }: NodeProps) {
           <textarea
             ref={inputRef}
             value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
+            onChange={(e) => { setEditValue(e.target.value); autoResizeTextarea(e.target); }}
             onKeyDown={handleKeyDown}
             onBlur={commitEdit}
+            className="nodrag"
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
             rows={1}
-            style={{ fontSize: fontSize as number, fontWeight: fontWeight as string, fontStyle: fontStyle as string, color: textColor as string, minWidth: 60, width: Math.max(editValue.length * 9, 60) }}
+            style={{ fontSize: fontSize as number, fontWeight: fontWeight as string, fontStyle: fontStyle as string, color: textColor as string, width: width ? width - 28 : undefined, minWidth: 60, maxWidth: 200, overflow: 'hidden', resize: 'none' }}
           />
         ) : (
           <span style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxWidth: 200, display: 'block', ...textStyle }}>

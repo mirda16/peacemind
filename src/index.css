@@ -127,6 +127,8 @@ body,
   color: inherit;
   resize: none;
   cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .pm-node-add-btn {
