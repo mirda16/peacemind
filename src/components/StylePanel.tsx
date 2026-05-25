@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Bold, Italic, Minus, Plus, RefreshCw, Image, List, Trash2 } from 'lucide-react';
 import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
@@ -36,17 +36,24 @@ function StylePresetsSection() {
   const t = useT();
   const currentStyleId = useMindMapStore((s) => s.currentStyleId);
   const applyStylePreset = useMindMapStore((s) => s.applyStylePreset);
+  const [applyColors, setApplyColors] = useState(true);
 
   return (
     <div className="pm-panel-section">
-      <SectionLabel>{t.panel.mapStyle}</SectionLabel>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <SectionLabel>{t.panel.mapStyle}</SectionLabel>
+        <label style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer', color: 'var(--pm-text-muted)' }}>
+          <input type="checkbox" checked={applyColors} onChange={(e) => setApplyColors(e.target.checked)} />
+          {t.panel.applyColors}
+        </label>
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {MAP_STYLE_PRESETS.map((preset) => {
           const pt = t.presets[preset.id] ?? { name: preset.name ?? preset.id, description: '' };
           return (
             <button
               key={preset.id}
-              onClick={() => applyStylePreset(preset.id)}
+              onClick={() => applyStylePreset(preset.id, applyColors)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '8px 12px', borderRadius: 8,

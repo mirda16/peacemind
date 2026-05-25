@@ -28,6 +28,7 @@ export interface Translations {
     nodeIcon: string; nodeImage: string; changeImage: string; insertImage: string;
     checklist: string; clearChecklist: string; addChecklistItem: string;
     nodeEdges: string; customColor: string; imageFilter: string;
+    applyColors: string;
   };
   shapes: { rounded: string; rectangle: string; ellipse: string; circle: string; pill: string };
   help: { title: string; shortcuts: { keys: string[]; desc: string }[] };
@@ -78,7 +79,7 @@ const en: Translations = {
     nodeIcon: 'Node icon', nodeImage: 'Node image', changeImage: 'Change',
     insertImage: 'Insert image', checklist: 'Checklist', clearChecklist: 'Clear',
     addChecklistItem: 'Add item', nodeEdges: 'Edges from node',
-    customColor: 'Custom color', imageFilter: 'Image',
+    customColor: 'Custom color', imageFilter: 'Image', applyColors: 'Change colors',
   },
   shapes: {
     rounded: '⬜ Rounded', rectangle: '🔲 Rect', ellipse: '⭕ Ellipse',
@@ -166,7 +167,7 @@ const cs: Translations = {
     nodeIcon: 'Ikona uzlu', nodeImage: 'Obrázek v uzlu', changeImage: 'Změnit',
     insertImage: 'Vložit obrázek', checklist: 'Zaškrtávací seznam', clearChecklist: 'Vymazat',
     addChecklistItem: 'Přidat položku', nodeEdges: 'Hrany od uzlu',
-    customColor: 'Vlastní barva', imageFilter: 'Obrázek',
+    customColor: 'Vlastní barva', imageFilter: 'Obrázek', applyColors: 'Změnit barvy',
   },
   shapes: {
     rounded: '⬜ Oblé', rectangle: '🔲 Rect', ellipse: '⭕ Elipsa',

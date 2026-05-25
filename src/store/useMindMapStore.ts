@@ -104,7 +104,7 @@ interface MindMapState {
   applyEdgeStyleToAll: (data: Partial<MindMapEdgeData>) => void;
 
   // Style presets
-  applyStylePreset: (styleId: string) => void;
+  applyStylePreset: (styleId: string, applyColors?: boolean) => void;
 
   // Free objects & groups
   addGroup: (position?: { x: number; y: number }) => string;
@@ -458,7 +458,7 @@ export const useMindMapStore = create<MindMapState>()(
       get().pushHistory();
     },
 
-    applyStylePreset: (styleId) => {
+    applyStylePreset: (styleId, applyColors = true) => {
       const preset = MAP_STYLE_PRESETS.find((s) => s.id === styleId);
       if (!preset) return;
 
@@ -466,14 +466,15 @@ export const useMindMapStore = create<MindMapState>()(
         state.currentStyleId = styleId;
         state.sketchMode = preset.sketchMode ?? false;
 
-        // Update default edge data
-        Object.assign(state.defaultEdgeData, preset.edge);
+        // Update default edge data (skip color if applyColors is false)
+        const { color: _ec, ...edgeWithoutColor } = preset.edge;
+        Object.assign(state.defaultEdgeData, applyColors ? preset.edge : edgeWithoutColor);
 
-        // Update all edges (with per-level colors if defined)
+        // Update all edges
         state.edges.forEach((edge) => {
-          if (edge.data) Object.assign(edge.data, preset.edge);
+          if (edge.data) Object.assign(edge.data, applyColors ? preset.edge : edgeWithoutColor);
           edge.animated = preset.edge.animated;
-          if (preset.levelEdgeColors) {
+          if (applyColors && preset.levelEdgeColors) {
             const depth = getNodeDepth(edge.target, state.edges);
             const ec = preset.levelEdgeColors[Math.min(Math.max(depth - 1, 0), preset.levelEdgeColors.length - 1)];
             if (edge.data) (edge.data as MindMapEdgeData).color = ec;
@@ -486,13 +487,17 @@ export const useMindMapStore = create<MindMapState>()(
           const isRoot = (node.data as MindMapNodeData).isRoot;
           const baseStyle = isRoot ? preset.rootNode : preset.childNode;
 
-          Object.assign(node.data, baseStyle);
+          if (applyColors) {
+            Object.assign(node.data, baseStyle);
+          } else {
+            const { backgroundColor: _bg, textColor: _tc, borderColor: _bc, ...styleWithoutColors } = baseStyle;
+            Object.assign(node.data, styleWithoutColors);
+          }
 
-          // Apply level color if preset defines them
-          if (preset.levelColors) {
+          // Apply level colors only when applyColors is true
+          if (applyColors && preset.levelColors) {
             const color = preset.levelColors[Math.min(depth, preset.levelColors.length - 1)];
             (node.data as MindMapNodeData).backgroundColor = color;
-            // White text only for the darkest levels (root + depth 1)
             (node.data as MindMapNodeData).textColor = depth <= 1 ? '#ffffff' : (node.data as MindMapNodeData).textColor;
           }
         });
