@@ -182,7 +182,7 @@ export const useMindMapStore = create<MindMapState>()(
     language: 'en' as Lang,
     isDirty: false,
     currentFilePath: null,
-    mapTitle: 'Nová mapa',
+    mapTitle: getT('en').defaults.mapTitle,
     history: [{ nodes: [initialRoot], edges: [] }],
     historyIndex: 0,
     defaultEdgeData: { ...DEFAULT_EDGE_DATA },

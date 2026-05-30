@@ -185,7 +185,7 @@ function MindMapNode({ id, data, selected, width }: NodeProps) {
     e.stopPropagation();
     const current = d.checklist ?? [];
     updateNodeData(id, {
-      checklist: [...current, { id: crypto.randomUUID(), text: 'Nová položka', checked: false }],
+      checklist: [...current, { id: crypto.randomUUID(), text: t.node.newItem, checked: false }],
     });
   }, [id, d, updateNodeData]);
 
