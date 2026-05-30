@@ -8,6 +8,7 @@ import {
 import { useMindMapStore } from '../store/useMindMapStore';
 import { useFileOps } from '../hooks/useFileOps';
 import { useT } from '../i18n';
+import { TRANSLATIONS } from '../i18n/translations';
 import { LayoutDirection } from '../utils/autoLayout';
 import KeyboardHelp from './KeyboardHelp';
 import RecentFilesMenu from './RecentFilesMenu';
@@ -244,15 +245,17 @@ export default function Toolbar({ onShowExport, onShowTemplates }: Props) {
 
       <KeyboardHelp />
 
-      {/* Language toggle */}
-      <button
+      {/* Language selector — auto-populated from TRANSLATIONS keys */}
+      <select
         className="pm-toolbar-btn"
-        onClick={() => setLanguage(language === 'en' ? 'cs' : 'en')}
-        title={language === 'en' ? 'Switch to Czech' : 'Switch to English'}
-        style={{ fontSize: 13, fontWeight: 600, minWidth: 32 }}
+        value={language}
+        onChange={(e) => setLanguage(e.target.value as typeof language)}
+        style={{ fontSize: 13, fontWeight: 600, cursor: 'pointer', paddingInline: 6 }}
       >
-        {language === 'en' ? 'CS' : 'EN'}
-      </button>
+        {(Object.keys(TRANSLATIONS) as (typeof language)[]).map((lang) => (
+          <option key={lang} value={lang}>{lang.toUpperCase()}</option>
+        ))}
+      </select>
 
       {/* Theme toggle */}
       <button className="pm-toolbar-btn" onClick={toggleTheme} title={t.toolbar.toggleTheme}>

@@ -1,3 +1,9 @@
+// --- How to add a new language ---
+// 1. Add the language code to the Lang type below (e.g. 'de' | 'fr')
+// 2. Copy the `cs` object at the bottom of this file, rename it, and translate all strings
+// 3. Add the new object to the TRANSLATIONS record at the very end of the file
+// The language selector in the toolbar is auto-populated from TRANSLATIONS keys — no other changes needed.
+
 export type Lang = 'en' | 'cs';
 
 export interface Translations {
