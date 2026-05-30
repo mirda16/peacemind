@@ -1,7 +1,8 @@
+
 # PeaceMind
 
 A desktop mind mapping application built with Tauri v2, React, and React Flow. Create, organize, and visualize your ideas with an intuitive node-based interface.
-
+<img width="2050" height="1286" alt="Snímek obrazovky_20260530_214903" src="https://github.com/user-attachments/assets/2f55612a-a2b5-4f63-bc8e-0c73796bb6a7" />
 **Features:**
 - Nodes with customizable shapes, colors, fonts, icons, and images
 - Checklists inside nodes
