@@ -10,6 +10,7 @@ export interface Translations {
     confirmNew: string; confirmOpen: string;
     layout: string; layoutLR: string; layoutRL: string; layoutTB: string; layoutBT: string; layoutRadial: string;
     search: string; recent: string; noRecent: string; removeRecent: string;
+    templates: string;
   };
   search: {
     placeholder: string; noResults: string; resultOf: string;
@@ -58,6 +59,7 @@ const en: Translations = {
     layout: 'Auto layout', layoutLR: 'Left → Right', layoutRL: 'Right → Left',
     layoutTB: 'Top → Bottom', layoutBT: 'Bottom → Top', layoutRadial: 'Radial',
     search: 'Search (Ctrl+F)', recent: 'Recent', noRecent: 'No recent files', removeRecent: 'Remove from list',
+    templates: 'Templates',
   },
   search: {
     placeholder: 'Search nodes…', noResults: 'No results', resultOf: 'of',
@@ -146,6 +148,7 @@ const cs: Translations = {
     layout: 'Auto rozložení', layoutLR: 'Zleva doprava', layoutRL: 'Zprava doleva',
     layoutTB: 'Shora dolů', layoutBT: 'Zdola nahoru', layoutRadial: 'Radiálně',
     search: 'Hledat (Ctrl+F)', recent: 'Nedávné', noRecent: 'Žádné nedávné soubory', removeRecent: 'Odebrat ze seznamu',
+    templates: 'Šablony',
   },
   search: {
     placeholder: 'Hledat uzly…', noResults: 'Žádné výsledky', resultOf: 'z',

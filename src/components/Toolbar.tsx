@@ -3,7 +3,7 @@ import { useReactFlow } from '@xyflow/react';
 import {
   FilePlus, FolderOpen, Save, Download, Undo2, Redo2,
   Sun, Moon, ZoomIn, ZoomOut, Maximize2, BoxSelect, Type, Square, Circle, StickyNote,
-  LayoutDashboard,
+  LayoutDashboard, LayoutTemplate,
 } from 'lucide-react';
 import { useMindMapStore } from '../store/useMindMapStore';
 import { useFileOps } from '../hooks/useFileOps';
@@ -14,9 +14,10 @@ import RecentFilesMenu from './RecentFilesMenu';
 
 interface Props {
   onShowExport: () => void;
+  onShowTemplates: () => void;
 }
 
-export default function Toolbar({ onShowExport }: Props) {
+export default function Toolbar({ onShowExport, onShowTemplates }: Props) {
   const t = useT();
   const mapTitle = useMindMapStore((s) => s.mapTitle);
   const isDirty = useMindMapStore((s) => s.isDirty);
@@ -98,6 +99,9 @@ export default function Toolbar({ onShowExport }: Props) {
       {/* File ops */}
       <button className="pm-toolbar-btn" onClick={handleNewMap} title={t.toolbar.newTooltip}>
         <FilePlus size={16} /> <span>{t.toolbar.new}</span>
+      </button>
+      <button className="pm-toolbar-btn" onClick={onShowTemplates} title={t.toolbar.templates}>
+        <LayoutTemplate size={16} /> <span>{t.toolbar.templates}</span>
       </button>
       <button className="pm-toolbar-btn" onClick={handleOpen} title={t.toolbar.openTooltip}>
         <FolderOpen size={16} /> <span>{t.toolbar.open}</span>

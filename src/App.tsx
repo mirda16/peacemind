@@ -9,6 +9,7 @@ import ContextMenu from './components/ContextMenu';
 import { useFileOps } from './hooks/useFileOps';
 import { useAutoSave } from './hooks/useAutoSave';
 import SearchBar from './components/SearchBar';
+import TemplateModal from './components/TemplateModal';
 
 interface CtxMenu {
   x: number;
@@ -27,6 +28,7 @@ export default function App() {
   const { saveMap, openMap } = useFileOps();
 
   const [showExport, setShowExport] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
   const [ctxMenu, setCtxMenu] = useState<CtxMenu | null>(null);
   const [showSearch, setShowSearch] = useState(false);
 
@@ -78,7 +80,7 @@ export default function App() {
   return (
     <ReactFlowProvider>
       <div className={sketchMode ? 'pm-sketch-mode' : undefined} style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
-        <Toolbar onShowExport={() => setShowExport(true)} />
+        <Toolbar onShowExport={() => setShowExport(true)} onShowTemplates={() => setShowTemplates(true)} />
 
         <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
           <MindMapCanvas onContextMenu={handleContextMenu} />
@@ -88,6 +90,15 @@ export default function App() {
       </div>
 
       {showExport && <ExportDialog onClose={() => setShowExport(false)} />}
+      {showTemplates && (
+        <TemplateModal
+          onClose={() => setShowTemplates(false)}
+          onConfirmDirty={() => {
+            if (!isDirty) return true;
+            return confirm('Mapa má neuložené změny. Přesto načíst šablonu?');
+          }}
+        />
+      )}
       {ctxMenu && (
         <ContextMenu
           x={ctxMenu.x}
