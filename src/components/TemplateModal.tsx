@@ -25,7 +25,7 @@ export default function TemplateModal({ onClose, onConfirmDirty }: Props) {
     if (!onConfirmDirty()) return;
     const tpl = MAP_TEMPLATES.find((t) => t.id === templateId);
     if (!tpl) return;
-    const { nodes, edges, title } = tpl.generate();
+    const { nodes, edges, title } = tpl.generate(language);
     loadMap(nodes as never, edges as never, title);
     onClose();
   };
