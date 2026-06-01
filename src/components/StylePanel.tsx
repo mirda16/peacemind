@@ -68,8 +68,15 @@ function StylePresetsSection() {
               }}
             >
               <span style={{ fontSize: 18 }}>{preset.icon}</span>
-              <div>
-                <div style={{ fontWeight: 600, fontSize: 13 }}>{pt.name}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontWeight: 600, fontSize: 13 }}>{pt.name}</span>
+                  {preset.id === 'klasicky' && (
+                    <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 4, background: 'var(--pm-accent)', color: '#fff', opacity: 0.8 }}>
+                      {t.panel.defaultBadge}
+                    </span>
+                  )}
+                </div>
                 <div style={{ fontSize: 11, color: 'var(--pm-text-muted)' }}>{pt.description}</div>
               </div>
             </button>

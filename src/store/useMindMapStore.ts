@@ -236,14 +236,11 @@ export const useMindMapStore = create<MindMapState>()(
       const preset = MAP_STYLE_PRESETS.find((s) => s.id === get().currentStyleId);
       const parentData = parent.data as MindMapNodeData;
 
-      // Inherit visual style from parent node
+      // Use preset's childNode style if available; inherit only typography and shape from parent
       const nodeData: MindMapNodeData = {
         ...DEFAULT_NODE_DATA,
+        ...(preset?.childNode ?? {}),
         label: getT(get().language).defaults.newNode,
-        backgroundColor: parentData.backgroundColor,
-        borderColor: parentData.borderColor,
-        borderWidth: parentData.borderWidth,
-        textColor: parentData.textColor,
         fontSize: parentData.fontSize,
         fontWeight: parentData.fontWeight,
         fontStyle: parentData.fontStyle,
@@ -395,6 +392,7 @@ export const useMindMapStore = create<MindMapState>()(
       set((state) => {
         state.nodes = nodes; state.edges = edges; state.mapTitle = title; state.theme = theme;
         state.isDirty = false; state.selectedNodeIds = []; state.editingNodeId = null;
+        state.currentStyleId = 'klasicky'; // reset to default; overridden by applyStylePreset if file has styleId
         state.history = [{ nodes: JSON.parse(JSON.stringify(nodes)), edges: JSON.parse(JSON.stringify(edges)) }];
         state.historyIndex = 0;
       });
