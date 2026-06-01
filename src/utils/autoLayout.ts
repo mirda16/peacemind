@@ -38,6 +38,25 @@ function computeDagreLayout(nodes: Node[], edges: Edge[], rankdir: 'LR' | 'RL' |
 
   dagre.layout(g);
 
+  // Dagre may reorder siblings within a rank. Restore creation order:
+  // collect children per parent (in edge-array order = creation order),
+  // then redistribute the dagre-assigned axis values in that same order.
+  const axis = (rankdir === 'LR' || rankdir === 'RL') ? 'y' : 'x';
+  const childrenByParent = new Map<string, string[]>();
+  edges.forEach((edge) => {
+    if (!childrenByParent.has(edge.source)) childrenByParent.set(edge.source, []);
+    childrenByParent.get(edge.source)!.push(edge.target);
+  });
+  childrenByParent.forEach((children) => {
+    if (children.length < 2) return;
+    const values = children.map((id) => g.node(id)?.[axis] ?? 0);
+    const sorted = [...values].sort((a, b) => a - b);
+    children.forEach((id, i) => {
+      const n = g.node(id);
+      if (n) n[axis] = sorted[i];
+    });
+  });
+
   return nodes.map((node) => {
     const n = g.node(node.id);
     if (!n) return node;
