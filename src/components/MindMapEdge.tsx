@@ -133,6 +133,33 @@ function getSmartPoints(
   };
 }
 
+// ---------- bus / tree path ----------
+// All edges from the same parent share a vertical "bus" at busOffset px from source.
+// Creates the XMind-style branching look: H → V → H with rounded corners.
+
+function getTreePath(sx: number, sy: number, tx: number, ty: number): string {
+  const r = 6;
+  const busOffset = 24;
+
+  if (Math.abs(ty - sy) < r * 2) {
+    return `M ${sx} ${sy} H ${tx}`;
+  }
+
+  const hd = tx >= sx ? 1 : -1; // horizontal direction
+  const vd = ty > sy ? 1 : -1;  // vertical direction
+  const busX = sx + hd * busOffset;
+  const rc = Math.min(r, Math.abs(ty - sy) / 2, busOffset / 2);
+
+  return [
+    `M ${sx} ${sy}`,
+    `H ${busX - hd * rc}`,
+    `Q ${busX} ${sy} ${busX} ${sy + vd * rc}`,
+    `V ${ty - vd * rc}`,
+    `Q ${busX} ${ty} ${busX + hd * rc} ${ty}`,
+    `H ${tx}`,
+  ].join(' ');
+}
+
 // ---------- tapered bezier (filled polygon) ----------
 
 function cubicBezier(t: number, p0: number, p1: number, p2: number, p3: number) {
@@ -226,7 +253,9 @@ function MindMapEdge({
   const pathProps = { sourceX: sx, sourceY: sy, targetX: tx, targetY: ty, sourcePosition: srcPos, targetPosition: tgtPos };
   let pathD = '';
 
-  if (edgeType === 'straight') {
+  if (edgeType === 'bus') {
+    pathD = getTreePath(sx, sy, tx, ty);
+  } else if (edgeType === 'straight') {
     [pathD] = getStraightPath(pathProps);
   } else if (edgeType === 'step') {
     [pathD] = getSmoothStepPath({ ...pathProps, borderRadius: 0 });

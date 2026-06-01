@@ -1,5 +1,5 @@
 export type NodeShape = 'rectangle' | 'rounded' | 'ellipse' | 'circle' | 'pill';
-export type EdgeType = 'smoothstep' | 'bezier' | 'straight' | 'step';
+export type EdgeType = 'smoothstep' | 'bezier' | 'straight' | 'step' | 'bus';
 
 export interface ChecklistItem {
   id: string;

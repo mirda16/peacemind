@@ -149,14 +149,15 @@ function GlobalEdgeSection() {
       <div className="pm-panel-row">
         <span style={{ fontSize: 12, color: 'var(--pm-text-muted)', width: 72 }}>{t.panel.lineType}</span>
         <div style={{ display: 'flex', gap: 4, flex: 1 }}>
-          {(['bezier', 'smoothstep', 'step', 'straight'] as const).map((type) => (
+          {(['bezier', 'smoothstep', 'step', 'straight', 'bus'] as const).map((type) => (
             <button
               key={type}
               className={`pm-shape-btn${defaultEdgeData.edgeType === type ? ' active' : ''}`}
               onClick={() => applyAll({ edgeType: type })}
               style={{ fontSize: 10 }}
+              title={type === 'bus' ? 'Bus / Tree' : undefined}
             >
-              {type === 'bezier' ? '〜' : type === 'smoothstep' ? '⌒' : type === 'step' ? '⌐' : '—'}
+              {type === 'bezier' ? '〜' : type === 'smoothstep' ? '⌒' : type === 'step' ? '⌐' : type === 'straight' ? '—' : '├'}
             </button>
           ))}
         </div>
