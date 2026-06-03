@@ -9,6 +9,9 @@ import {
 import { useMindMapStore } from '../store/useMindMapStore';
 import { MindMapEdgeData } from '../types/mindmap';
 
+const DEFAULT_W = 160;
+const DEFAULT_H = 48;
+
 // ---------- geometry helpers ----------
 
 function getNodeDepth(nodeId: string, edges: { source: string; target: string }[]): number {
@@ -265,9 +268,40 @@ function MindMapEdge({
   const depth = getNodeDepth(target, edges);
   const strokeWidth = variableWidth ? Math.max(0.8, baseWidth - depth * 0.8) : baseWidth;
 
-  const { sx, sy, srcPos, tx, ty, tgtPos } = getSmartPoints(
+  const { sx, sy: rawSY, srcPos, tx, ty, tgtPos } = getSmartPoints(
     source, target, sourceX, sourceY, targetX, targetY, nodes
   );
+
+  // For bus edges: spread exit Y positions evenly across the source node height
+  // so sibling edges don't all leave from the same point.
+  let sy = rawSY;
+  if (edgeType === 'bus') {
+    const siblings = edges.filter((e) => e.source === source);
+    if (siblings.length > 1) {
+      const sNode = nodes.find((n) => n.id === source);
+      const sPos = getAbsolutePos(source, nodes);
+      const sh = sNode?.measured?.height ?? DEFAULT_H;
+      const sw = sNode?.measured?.width ?? DEFAULT_W;
+
+      // Sort siblings by target center Y so index matches visual top→bottom order
+      const sorted = siblings
+        .map((sib) => {
+          const tNode = nodes.find((n) => n.id === sib.target);
+          const tPos = getAbsolutePos(sib.target, nodes);
+          return { edgeId: sib.id, cy: tPos.y + (tNode?.measured?.height ?? DEFAULT_H) / 2 };
+        })
+        .sort((a, b) => a.cy - b.cy);
+
+      const myIdx = sorted.findIndex((s) => s.edgeId === id);
+      if (myIdx >= 0) {
+        const spread = sw / 2; // spread = half the node width
+        const offset = siblings.length > 1
+          ? (myIdx / (siblings.length - 1) - 0.5) * spread
+          : 0;
+        sy = sPos.y + sh / 2 + offset;
+      }
+    }
+  }
 
   // Tapered organic mode
   if (tapered && edgeType === 'bezier') {
