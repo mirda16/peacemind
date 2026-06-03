@@ -268,22 +268,30 @@ function MindMapEdge({
   const depth = getNodeDepth(target, edges);
   const strokeWidth = variableWidth ? Math.max(0.8, baseWidth - depth * 0.8) : baseWidth;
 
-  const { sx, sy: rawSY, srcPos, tx, ty, tgtPos } = getSmartPoints(
+  const { sx: rawSX, sy: rawSY, srcPos, tx, ty, tgtPos } = getSmartPoints(
     source, target, sourceX, sourceY, targetX, targetY, nodes
   );
 
-  // For bus edges: spread exit Y positions evenly across the source node height
-  // so sibling edges don't all leave from the same point.
+  // For bus edges: always exit from the right (or left) border of the source node,
+  // with Y positions spread evenly across the node height.
+  let sx = rawSX;
   let sy = rawSY;
   if (edgeType === 'bus') {
-    const siblings = edges.filter((e) => e.source === source);
-    if (siblings.length > 1) {
-      const sNode = nodes.find((n) => n.id === source);
-      const sPos = getAbsolutePos(source, nodes);
-      const sh = sNode?.measured?.height ?? DEFAULT_H;
-      const sw = sNode?.measured?.width ?? DEFAULT_W;
+    const sNode = nodes.find((n) => n.id === source);
+    const sPos = getAbsolutePos(source, nodes);
+    const sh = sNode?.measured?.height ?? DEFAULT_H;
+    const sw = sNode?.measured?.width ?? DEFAULT_W;
+    const hd = tx >= rawSX ? 1 : -1;
+    const PAD = 4;
 
-      // Sort siblings by target center Y so index matches visual top→bottom order
+    // Force source exit from the correct horizontal border (not top/bottom)
+    sx = hd > 0 ? sPos.x + sw - PAD : sPos.x + PAD;
+
+    const siblings = edges.filter((e) => e.source === source);
+    const sourceCY = sPos.y + sh / 2;
+
+    if (siblings.length > 1) {
+      // Sort siblings by target center Y (top→bottom)
       const sorted = siblings
         .map((sib) => {
           const tNode = nodes.find((n) => n.id === sib.target);
@@ -294,12 +302,13 @@ function MindMapEdge({
 
       const myIdx = sorted.findIndex((s) => s.edgeId === id);
       if (myIdx >= 0) {
-        const spread = sw / 2; // spread = half the node width
-        const offset = siblings.length > 1
-          ? (myIdx / (siblings.length - 1) - 0.5) * spread
-          : 0;
-        sy = sPos.y + sh / 2 + offset;
+        // Spread clamped to 85% of node height
+        const spread = Math.min(sw / 2, sh * 0.85);
+        const offset = (myIdx / (siblings.length - 1) - 0.5) * spread;
+        sy = Math.max(sPos.y + PAD, Math.min(sPos.y + sh - PAD, sourceCY + offset));
       }
+    } else {
+      sy = sourceCY;
     }
   }
 
