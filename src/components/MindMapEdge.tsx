@@ -136,11 +136,25 @@ function getSmartPoints(
   };
 }
 
-// ---------- bus / tree path ----------
-// All edges from the same parent share a vertical "bus" at busOffset px from source.
-// Creates the XMind-style branching look: H → V → H with rounded corners.
-// Collision detection: iteratively pushes busX past any node bounding boxes that
-// intersect the vertical segment, so edges never pass through unrelated nodes.
+// ---------- bus / tree paths ----------
+
+// Perpendicular exit from top or bottom surface: V → H (with rounded corner).
+function getPerpendicularPath(sx: number, sy: number, tx: number, ty: number): string {
+  const r = 6;
+  if (Math.abs(ty - sy) < r * 2) return `M ${sx} ${sy} H ${tx}`;
+  const vd = ty > sy ? 1 : -1;
+  const hd = tx >= sx ? 1 : -1;
+  const rc = Math.min(r, Math.abs(ty - sy) / 2, Math.abs(tx - sx) / 2);
+  return [
+    `M ${sx} ${sy}`,
+    `V ${ty - vd * rc}`,
+    `Q ${sx} ${ty} ${sx + hd * rc} ${ty}`,
+    `H ${tx}`,
+  ].join(' ');
+}
+
+// Standard bus exit from right/left surface: H → V → H with rounded corners.
+// Collision detection pushes busX past any blocking node bounding boxes.
 
 function getTreePath(
   sx: number, sy: number, tx: number, ty: number,
@@ -280,6 +294,8 @@ function MindMapEdge({
   let sx = rawSX;
   let sy = rawSY;
   let busXHint: number | undefined;
+  let exitSurface: 'top' | 'right' | 'bottom' = 'right';
+
   if (edgeType === 'bus') {
     const sNode = nodes.find((n) => n.id === source);
     const sPos = getAbsolutePos(source, nodes);
@@ -292,14 +308,12 @@ function MindMapEdge({
     const nodeRight  = sPos.x + sw;
     const nodeBottom = sPos.y + sh;
 
-    // busX is just outside the node's horizontal border
     busXHint = hd > 0 ? nodeRight + 24 : nodeLeft - 24;
 
     const siblings = edges.filter((e) => e.source === source);
     const N = siblings.length;
 
     if (N > 1) {
-      // Sort siblings by target center Y (top → bottom)
       const sorted = siblings
         .map((sib) => {
           const tNode = nodes.find((n) => n.id === sib.target);
@@ -310,28 +324,27 @@ function MindMapEdge({
 
       const myIdx = sorted.findIndex((s) => s.edgeId === id);
       if (myIdx >= 0) {
-        // Distribute evenly along right-half perimeter: top-center → right side → bottom-center
-        // Total perimeter length = sw/2 (top) + sh (right) + sw/2 (bottom) = sw + sh
         const perimLen = sw + sh;
         const d = (myIdx / (N - 1)) * perimLen;
 
         if (d <= sw / 2) {
-          // Top half-edge: from (left+W/2, top) to (right, top)
           sx = hd > 0 ? nodeLeft + sw / 2 + d : nodeRight - sw / 2 - d;
           sy = nodeTop;
+          exitSurface = 'top';
         } else if (d <= sw / 2 + sh) {
-          // Right/left full edge
           sx = hd > 0 ? nodeRight : nodeLeft;
           sy = nodeTop + (d - sw / 2);
+          exitSurface = 'right';
         } else {
-          // Bottom half-edge: from (right, bottom) to (left+W/2, bottom)
           sx = hd > 0 ? nodeRight - (d - sw / 2 - sh) : nodeLeft + (d - sw / 2 - sh);
           sy = nodeBottom;
+          exitSurface = 'bottom';
         }
       }
     } else {
       sx = hd > 0 ? nodeRight : nodeLeft;
       sy = sPos.y + sh / 2;
+      exitSurface = 'right';
     }
   }
 
@@ -359,7 +372,11 @@ function MindMapEdge({
   let pathD = '';
 
   if (edgeType === 'bus') {
-    pathD = getTreePath(sx, sy, tx, ty, source, target, nodes, busXHint);
+    if (exitSurface === 'top' || exitSurface === 'bottom') {
+      pathD = getPerpendicularPath(sx, sy, tx, ty);
+    } else {
+      pathD = getTreePath(sx, sy, tx, ty, source, target, nodes, busXHint);
+    }
   } else if (edgeType === 'straight') {
     [pathD] = getStraightPath(pathProps);
   } else if (edgeType === 'step') {
