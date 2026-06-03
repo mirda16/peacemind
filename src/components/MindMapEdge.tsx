@@ -115,10 +115,11 @@ function getSmartPoints(
 
   const sShape = sNode.data?.shape;
   const tShape = tNode.data?.shape;
-  const borderFn = (isEllipse: boolean) => isEllipse ? getEllipseBorderPoint : getBorderPoint;
+  const isRound = (s?: string) => s === 'ellipse' || s === 'circle';
+  const borderFn = (round: boolean) => round ? getEllipseBorderPoint : getBorderPoint;
 
-  const sp = borderFn(sShape === 'ellipse')(scx, scy, sw / 2, sh / 2, dx, dy);
-  const tp = borderFn(tShape === 'ellipse')(tcx, tcy, tw / 2, th / 2, -dx, -dy);
+  const sp = borderFn(isRound(sShape))(scx, scy, sw / 2, sh / 2, dx, dy);
+  const tp = borderFn(isRound(tShape))(tcx, tcy, tw / 2, th / 2, -dx, -dy);
 
   // Inset both endpoints slightly inside their node so the edge hides under the node body
   const dist = Math.sqrt(dx * dx + dy * dy) || 1;
@@ -301,50 +302,89 @@ function MindMapEdge({
     const sPos = getAbsolutePos(source, nodes);
     const sh = sNode?.measured?.height ?? DEFAULT_H;
     const sw = sNode?.measured?.width ?? DEFAULT_W;
-    const hd = tx >= rawSX ? 1 : -1;
 
     const nodeLeft   = sPos.x;
     const nodeTop    = sPos.y;
     const nodeRight  = sPos.x + sw;
     const nodeBottom = sPos.y + sh;
 
-    busXHint = hd > 0 ? nodeRight + 24 : nodeLeft - 24;
-
     const siblings = edges.filter((e) => e.source === source);
     const N = siblings.length;
 
-    if (N > 1) {
-      const sorted = siblings
-        .map((sib) => {
-          const tNode = nodes.find((n) => n.id === sib.target);
-          const tPos = getAbsolutePos(sib.target, nodes);
-          return { edgeId: sib.id, cy: tPos.y + (tNode?.measured?.height ?? DEFAULT_H) / 2 };
-        })
-        .sort((a, b) => a.cy - b.cy);
+    // Detect layout orientation from average target position
+    const avgDX = siblings.reduce((s, e) => {
+      const n = nodes.find((nd) => nd.id === e.target);
+      return s + (n ? getAbsolutePos(e.target, nodes).x + (n.measured?.width ?? DEFAULT_W) / 2 : 0);
+    }, 0) / Math.max(N, 1) - (sPos.x + sw / 2);
+    const avgDY = siblings.reduce((s, e) => {
+      const n = nodes.find((nd) => nd.id === e.target);
+      return s + (n ? getAbsolutePos(e.target, nodes).y + (n.measured?.height ?? DEFAULT_H) / 2 : 0);
+    }, 0) / Math.max(N, 1) - (sPos.y + sh / 2);
 
-      const myIdx = sorted.findIndex((s) => s.edgeId === id);
-      if (myIdx >= 0) {
-        const perimLen = sw + sh;
-        const d = (myIdx / (N - 1)) * perimLen;
+    const isVertical = Math.abs(avgDY) > Math.abs(avgDX);
 
-        if (d <= sw / 2) {
-          sx = hd > 0 ? nodeLeft + sw / 2 + d : nodeRight - sw / 2 - d;
-          sy = nodeTop;
-          exitSurface = 'top';
-        } else if (d <= sw / 2 + sh) {
-          sx = hd > 0 ? nodeRight : nodeLeft;
-          sy = nodeTop + (d - sw / 2);
-          exitSurface = 'right';
-        } else {
-          sx = hd > 0 ? nodeRight - (d - sw / 2 - sh) : nodeLeft + (d - sw / 2 - sh);
-          sy = nodeBottom;
-          exitSurface = 'bottom';
+    if (isVertical) {
+      // TB / BT: spread along bottom (TB) or top (BT) edge, route perpendicular V→H
+      const vd = avgDY >= 0 ? 1 : -1;
+      const exitY = vd > 0 ? nodeBottom : nodeTop;
+      exitSurface = vd > 0 ? 'bottom' : 'top';
+
+      if (N > 1) {
+        const sorted = siblings
+          .map((sib) => {
+            const tNode = nodes.find((n) => n.id === sib.target);
+            const tPos = getAbsolutePos(sib.target, nodes);
+            return { edgeId: sib.id, cx: tPos.x + (tNode?.measured?.width ?? DEFAULT_W) / 2 };
+          })
+          .sort((a, b) => a.cx - b.cx);
+
+        const myIdx = sorted.findIndex((s) => s.edgeId === id);
+        if (myIdx >= 0) {
+          sx = nodeLeft + (myIdx / (N - 1)) * sw;
+          sy = exitY;
         }
+      } else {
+        sx = sPos.x + sw / 2;
+        sy = exitY;
       }
     } else {
-      sx = hd > 0 ? nodeRight : nodeLeft;
-      sy = sPos.y + sh / 2;
-      exitSurface = 'right';
+      // LR / RL: spread along right (LR) or left (RL) half-perimeter, route H→V→H
+      const hd = avgDX >= 0 ? 1 : -1;
+      busXHint = hd > 0 ? nodeRight + 24 : nodeLeft - 24;
+
+      if (N > 1) {
+        const sorted = siblings
+          .map((sib) => {
+            const tNode = nodes.find((n) => n.id === sib.target);
+            const tPos = getAbsolutePos(sib.target, nodes);
+            return { edgeId: sib.id, cy: tPos.y + (tNode?.measured?.height ?? DEFAULT_H) / 2 };
+          })
+          .sort((a, b) => a.cy - b.cy);
+
+        const myIdx = sorted.findIndex((s) => s.edgeId === id);
+        if (myIdx >= 0) {
+          const perimLen = sw + sh;
+          const d = (myIdx / (N - 1)) * perimLen;
+
+          if (d <= sw / 2) {
+            sx = hd > 0 ? nodeLeft + sw / 2 + d : nodeRight - sw / 2 - d;
+            sy = nodeTop;
+            exitSurface = 'top';
+          } else if (d <= sw / 2 + sh) {
+            sx = hd > 0 ? nodeRight : nodeLeft;
+            sy = nodeTop + (d - sw / 2);
+            exitSurface = 'right';
+          } else {
+            sx = hd > 0 ? nodeRight - (d - sw / 2 - sh) : nodeLeft + (d - sw / 2 - sh);
+            sy = nodeBottom;
+            exitSurface = 'bottom';
+          }
+        }
+      } else {
+        sx = hd > 0 ? nodeRight : nodeLeft;
+        sy = sPos.y + sh / 2;
+        exitSurface = 'right';
+      }
     }
   }
 
