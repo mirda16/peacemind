@@ -146,20 +146,22 @@ function getTreePath(
   sx: number, sy: number, tx: number, ty: number,
   sourceId: string, targetId: string,
   allNodes: NodeForEdge[],
+  suggestedBusX?: number,
 ): string {
   const r = 6;
-  const PAD = 6; // padding around node bounding boxes
+  const PAD = 6;
+
+  const hd = tx >= sx ? 1 : -1;
+  const vd = ty > sy ? 1 : -1;
 
   if (Math.abs(ty - sy) < r * 2) {
     return `M ${sx} ${sy} H ${tx}`;
   }
 
-  const hd = tx >= sx ? 1 : -1;
-  const vd = ty > sy ? 1 : -1;
   const yMin = Math.min(sy, ty);
   const yMax = Math.max(sy, ty);
 
-  let busX = sx + hd * 24;
+  let busX = suggestedBusX ?? (sx + hd * 24);
 
   // Push busX past every node whose bounding box intersects the vertical segment.
   // Repeat until no more collisions (handles cascading — one node hidden behind another).
@@ -272,26 +274,32 @@ function MindMapEdge({
     source, target, sourceX, sourceY, targetX, targetY, nodes
   );
 
-  // For bus edges: always exit from the right (or left) border of the source node,
-  // with Y positions spread evenly across the node height.
+  // For bus edges: distribute exit points along the right-half perimeter of the source node.
+  // Path: top-center → top-right corner → right edge → bottom-right corner → bottom-center.
+  // Each exit point then routes M sx sy → H busX → V ty → H tx.
   let sx = rawSX;
   let sy = rawSY;
+  let busXHint: number | undefined;
   if (edgeType === 'bus') {
     const sNode = nodes.find((n) => n.id === source);
     const sPos = getAbsolutePos(source, nodes);
     const sh = sNode?.measured?.height ?? DEFAULT_H;
     const sw = sNode?.measured?.width ?? DEFAULT_W;
     const hd = tx >= rawSX ? 1 : -1;
-    const PAD = 4;
 
-    // Force source exit from the correct horizontal border (not top/bottom)
-    sx = hd > 0 ? sPos.x + sw - PAD : sPos.x + PAD;
+    const nodeLeft   = sPos.x;
+    const nodeTop    = sPos.y;
+    const nodeRight  = sPos.x + sw;
+    const nodeBottom = sPos.y + sh;
+
+    // busX is just outside the node's horizontal border
+    busXHint = hd > 0 ? nodeRight + 24 : nodeLeft - 24;
 
     const siblings = edges.filter((e) => e.source === source);
-    const sourceCY = sPos.y + sh / 2;
+    const N = siblings.length;
 
-    if (siblings.length > 1) {
-      // Sort siblings by target center Y (top→bottom)
+    if (N > 1) {
+      // Sort siblings by target center Y (top → bottom)
       const sorted = siblings
         .map((sib) => {
           const tNode = nodes.find((n) => n.id === sib.target);
@@ -302,13 +310,28 @@ function MindMapEdge({
 
       const myIdx = sorted.findIndex((s) => s.edgeId === id);
       if (myIdx >= 0) {
-        // Spread clamped to 85% of node height
-        const spread = Math.min(sw / 2, sh * 0.85);
-        const offset = (myIdx / (siblings.length - 1) - 0.5) * spread;
-        sy = Math.max(sPos.y + PAD, Math.min(sPos.y + sh - PAD, sourceCY + offset));
+        // Distribute evenly along right-half perimeter: top-center → right side → bottom-center
+        // Total perimeter length = sw/2 (top) + sh (right) + sw/2 (bottom) = sw + sh
+        const perimLen = sw + sh;
+        const d = (myIdx / (N - 1)) * perimLen;
+
+        if (d <= sw / 2) {
+          // Top half-edge: from (left+W/2, top) to (right, top)
+          sx = hd > 0 ? nodeLeft + sw / 2 + d : nodeRight - sw / 2 - d;
+          sy = nodeTop;
+        } else if (d <= sw / 2 + sh) {
+          // Right/left full edge
+          sx = hd > 0 ? nodeRight : nodeLeft;
+          sy = nodeTop + (d - sw / 2);
+        } else {
+          // Bottom half-edge: from (right, bottom) to (left+W/2, bottom)
+          sx = hd > 0 ? nodeRight - (d - sw / 2 - sh) : nodeLeft + (d - sw / 2 - sh);
+          sy = nodeBottom;
+        }
       }
     } else {
-      sy = sourceCY;
+      sx = hd > 0 ? nodeRight : nodeLeft;
+      sy = sPos.y + sh / 2;
     }
   }
 
@@ -336,7 +359,7 @@ function MindMapEdge({
   let pathD = '';
 
   if (edgeType === 'bus') {
-    pathD = getTreePath(sx, sy, tx, ty, source, target, nodes);
+    pathD = getTreePath(sx, sy, tx, ty, source, target, nodes, busXHint);
   } else if (edgeType === 'straight') {
     [pathD] = getStraightPath(pathProps);
   } else if (edgeType === 'step') {
