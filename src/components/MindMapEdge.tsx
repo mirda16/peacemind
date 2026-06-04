@@ -115,11 +115,18 @@ function getSmartPoints(
 
   const sShape = sNode.data?.shape;
   const tShape = tNode.data?.shape;
-  const isRound = (s?: string) => s === 'ellipse' || s === 'circle';
-  const borderFn = (round: boolean) => round ? getEllipseBorderPoint : getBorderPoint;
+  const borderPoint = (shape: string | undefined, cx: number, cy: number, hw: number, hh: number, ddx: number, ddy: number): BorderPt => {
+    if (shape === 'ellipse') return getEllipseBorderPoint(cx, cy, hw, hh, ddx, ddy);
+    if (shape === 'circle') {
+      // Use inscribed square: sides at R/√2 from center
+      const ih = Math.min(hw, hh) / Math.SQRT2;
+      return getBorderPoint(cx, cy, ih, ih, ddx, ddy);
+    }
+    return getBorderPoint(cx, cy, hw, hh, ddx, ddy);
+  };
 
-  const sp = borderFn(isRound(sShape))(scx, scy, sw / 2, sh / 2, dx, dy);
-  const tp = borderFn(isRound(tShape))(tcx, tcy, tw / 2, th / 2, -dx, -dy);
+  const sp = borderPoint(sShape, scx, scy, sw / 2, sh / 2, dx, dy);
+  const tp = borderPoint(tShape, tcx, tcy, tw / 2, th / 2, -dx, -dy);
 
   // Inset both endpoints slightly inside their node so the edge hides under the node body
   const dist = Math.sqrt(dx * dx + dy * dy) || 1;
