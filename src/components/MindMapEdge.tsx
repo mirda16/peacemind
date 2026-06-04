@@ -330,67 +330,99 @@ function MindMapEdge({
 
     const isVertical = Math.abs(avgDY) > Math.abs(avgDX);
 
+    const shape = sNode?.data?.shape as string | undefined;
+    const isCircleNode = shape === 'circle' || shape === 'ellipse';
+    const cx = sPos.x + sw / 2;
+    const cy = sPos.y + sh / 2;
+    const R = Math.min(sw, sh) / 2;
+
+    // Sort helper
+    const sortedBy = (key: 'cy' | 'cx') => siblings
+      .map((sib) => {
+        const tNode = nodes.find((n) => n.id === sib.target);
+        const tPos = getAbsolutePos(sib.target, nodes);
+        return {
+          edgeId: sib.id,
+          cy: tPos.y + (tNode?.measured?.height ?? DEFAULT_H) / 2,
+          cx: tPos.x + (tNode?.measured?.width ?? DEFAULT_W) / 2,
+        };
+      })
+      .sort((a, b) => a[key] - b[key]);
+
     if (isVertical) {
-      // TB / BT: spread along bottom (TB) or top (BT) edge, route perpendicular V→H
+      // TB / BT layout
       const vd = avgDY >= 0 ? 1 : -1;
-      const exitY = vd > 0 ? nodeBottom : nodeTop;
-      exitSurface = vd > 0 ? 'bottom' : 'top';
 
-      if (N > 1) {
-        const sorted = siblings
-          .map((sib) => {
-            const tNode = nodes.find((n) => n.id === sib.target);
-            const tPos = getAbsolutePos(sib.target, nodes);
-            return { edgeId: sib.id, cx: tPos.x + (tNode?.measured?.width ?? DEFAULT_W) / 2 };
-          })
-          .sort((a, b) => a.cx - b.cx);
-
+      if (isCircleNode) {
+        // Distribute along the bottom (TB) or top (BT) semicircle
+        // Angles: π (left-center) → π/2 (bottom) → 0 (right-center) for TB
+        const sorted = sortedBy('cx');
         const myIdx = sorted.findIndex((s) => s.edgeId === id);
-        if (myIdx >= 0) {
-          sx = nodeLeft + (myIdx / (N - 1)) * sw;
-          sy = exitY;
+        if (myIdx >= 0 || N === 1) {
+          const t = N > 1 ? myIdx / (N - 1) : 0.5;
+          const angle = vd > 0
+            ? Math.PI - t * Math.PI      // TB: π → 0 (through bottom)
+            : t * Math.PI;               // BT: 0 → π (through top)
+          sx = cx + R * Math.cos(angle);
+          sy = cy + R * Math.sin(vd > 0 ? Math.PI / 2 - (angle - Math.PI / 2) : -(Math.PI / 2 - (angle - Math.PI / 2)));
+          // Simpler: for TB spread angle from π to 0 through the bottom half
+          const a = vd > 0 ? Math.PI / 2 + (0.5 - t) * Math.PI : -Math.PI / 2 + (t - 0.5) * Math.PI;
+          sx = cx + R * Math.cos(a);
+          sy = cy + R * Math.sin(a);
+          exitSurface = Math.abs(a - (vd > 0 ? Math.PI / 2 : -Math.PI / 2)) < Math.PI / 4 ? (vd > 0 ? 'bottom' : 'top') : 'right';
         }
       } else {
-        sx = sPos.x + sw / 2;
-        sy = exitY;
+        const exitY = vd > 0 ? nodeBottom : nodeTop;
+        exitSurface = vd > 0 ? 'bottom' : 'top';
+        const sorted = sortedBy('cx');
+        const myIdx = sorted.findIndex((s) => s.edgeId === id);
+        if (myIdx >= 0) {
+          sx = nodeLeft + (N > 1 ? (myIdx / (N - 1)) * sw : sw / 2);
+          sy = exitY;
+        } else {
+          sx = cx; sy = exitY;
+        }
       }
     } else {
-      // LR / RL: spread along right (LR) or left (RL) half-perimeter, route H→V→H
+      // LR / RL layout
       const hd = avgDX >= 0 ? 1 : -1;
-      busXHint = hd > 0 ? nodeRight + 24 : nodeLeft - 24;
 
-      if (N > 1) {
-        const sorted = siblings
-          .map((sib) => {
-            const tNode = nodes.find((n) => n.id === sib.target);
-            const tPos = getAbsolutePos(sib.target, nodes);
-            return { edgeId: sib.id, cy: tPos.y + (tNode?.measured?.height ?? DEFAULT_H) / 2 };
-          })
-          .sort((a, b) => a.cy - b.cy);
-
+      if (isCircleNode) {
+        // Distribute along the right (LR) or left (RL) semicircle
+        // Angles: -π/2 (top-center) → 0 (right) → π/2 (bottom-center) for LR
+        const sorted = sortedBy('cy');
+        const myIdx = sorted.findIndex((s) => s.edgeId === id);
+        if (myIdx >= 0 || N === 1) {
+          const t = N > 1 ? myIdx / (N - 1) : 0.5;
+          const angle = hd > 0
+            ? -Math.PI / 2 + t * Math.PI   // LR: -π/2 → π/2 (through right)
+            : Math.PI / 2 + t * Math.PI;   // RL: π/2 → 3π/2 (through left)
+          sx = cx + R * Math.cos(angle);
+          sy = cy + R * Math.sin(angle);
+          busXHint = hd > 0 ? cx + R + 24 : cx - R - 24;
+          const absAngle = Math.abs(angle % Math.PI);
+          exitSurface = absAngle < Math.PI / 4 ? 'right' : angle < 0 ? 'top' : 'bottom';
+        }
+      } else {
+        busXHint = hd > 0 ? nodeRight + 24 : nodeLeft - 24;
+        const sorted = sortedBy('cy');
         const myIdx = sorted.findIndex((s) => s.edgeId === id);
         if (myIdx >= 0) {
           const perimLen = sw + sh;
           const d = (myIdx / (N - 1)) * perimLen;
-
           if (d <= sw / 2) {
             sx = hd > 0 ? nodeLeft + sw / 2 + d : nodeRight - sw / 2 - d;
-            sy = nodeTop;
-            exitSurface = 'top';
+            sy = nodeTop; exitSurface = 'top';
           } else if (d <= sw / 2 + sh) {
             sx = hd > 0 ? nodeRight : nodeLeft;
-            sy = nodeTop + (d - sw / 2);
-            exitSurface = 'right';
+            sy = nodeTop + (d - sw / 2); exitSurface = 'right';
           } else {
             sx = hd > 0 ? nodeRight - (d - sw / 2 - sh) : nodeLeft + (d - sw / 2 - sh);
-            sy = nodeBottom;
-            exitSurface = 'bottom';
+            sy = nodeBottom; exitSurface = 'bottom';
           }
+        } else {
+          sx = hd > 0 ? nodeRight : nodeLeft; sy = cy; exitSurface = 'right';
         }
-      } else {
-        sx = hd > 0 ? nodeRight : nodeLeft;
-        sy = sPos.y + sh / 2;
-        exitSurface = 'right';
       }
     }
   }
