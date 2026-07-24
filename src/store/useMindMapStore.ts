@@ -36,12 +36,34 @@ interface HistoryEntry {
   edges: MindEdge[];
 }
 
+// Per-map subset of the flat state below, used to archive inactive tabs.
+// Deliberately excludes app-wide fields (theme, language, showNotes).
+interface TabSnapshot {
+  nodes: MindNode[];
+  edges: MindEdge[];
+  selectedNodeIds: string[];
+  editingNodeId: string | null;
+  viewport: Viewport;
+  viewportInitialized: boolean;
+  isDirty: boolean;
+  currentFilePath: string | null;
+  mapTitle: string;
+  history: HistoryEntry[];
+  historyIndex: number;
+  defaultEdgeData: MindMapEdgeData;
+  currentStyleId: string;
+  sketchMode: boolean;
+  searchQuery: string;
+  searchResultIds: string[];
+}
+
 interface MindMapState {
   nodes: MindNode[];
   edges: MindEdge[];
   selectedNodeIds: string[];
   editingNodeId: string | null;
   viewport: Viewport;
+  viewportInitialized: boolean;
   theme: 'light' | 'dark';
   language: Lang;
   isDirty: boolean;
@@ -55,6 +77,11 @@ interface MindMapState {
   sketchMode: boolean;
   searchQuery: string;
   searchResultIds: string[];
+
+  // Tabs (multiple open maps)
+  activeTabId: string;
+  tabOrder: string[];
+  tabs: Record<string, TabSnapshot>;
 
   // Flow callbacks
   onNodesChange: (changes: NodeChange[]) => void;
@@ -85,8 +112,18 @@ interface MindMapState {
   setMapTitle: (title: string) => void;
   setCurrentFilePath: (path: string | null) => void;
   setIsDirty: (dirty: boolean) => void;
-  loadMap: (nodes: MindNode[], edges: MindEdge[], title: string, theme?: 'light' | 'dark') => void;
+  loadMap: (nodes: MindNode[], edges: MindEdge[], title: string, theme?: 'light' | 'dark', viewport?: Viewport) => void;
   newMap: () => void;
+
+  // Tabs
+  openNewTab: () => string;
+  switchTab: (tabId: string) => void;
+  closeTab: (tabId: string) => void;
+  loadMapInNewTab: (opts: {
+    nodes: MindNode[]; edges: MindEdge[]; title: string;
+    theme?: 'light' | 'dark'; viewport?: Viewport;
+    filePath?: string | null; styleId?: string;
+  }) => string;
 
   // Theme & language
   toggleTheme: () => void;
@@ -148,6 +185,31 @@ function getBranchAncestorId(nodeId: string, rootId: string, edges: MindEdge[]):
   return current;
 }
 
+// Archives the currently active map (the flat state fields) into a tab snapshot.
+// Called from inside an immer producer, so the fields being read are draft
+// references — assigning the returned object into state.tabs[id] is a plain
+// draft relocation, no cloning needed.
+function snapshotFromState(state: MindMapState): TabSnapshot {
+  return {
+    nodes: state.nodes,
+    edges: state.edges,
+    selectedNodeIds: state.selectedNodeIds,
+    editingNodeId: state.editingNodeId,
+    viewport: state.viewport,
+    viewportInitialized: state.viewportInitialized,
+    isDirty: state.isDirty,
+    currentFilePath: state.currentFilePath,
+    mapTitle: state.mapTitle,
+    history: state.history,
+    historyIndex: state.historyIndex,
+    defaultEdgeData: state.defaultEdgeData,
+    currentStyleId: state.currentStyleId,
+    sketchMode: state.sketchMode,
+    searchQuery: state.searchQuery,
+    searchResultIds: state.searchResultIds,
+  };
+}
+
 function contrastTextColor(hex: string): string {
   const c = hex.replace('#', '');
   if (c.length !== 6) return '#1e293b';
@@ -196,6 +258,7 @@ function createRootNode(styleId = 'klasicky', lang: Lang = 'en'): MindNode {
 // ---------- store ----------
 
 const initialRoot = createRootNode();
+const initialTabId = uuidv4();
 
 export const useMindMapStore = create<MindMapState>()(
   immer((set, get) => ({
@@ -204,6 +267,7 @@ export const useMindMapStore = create<MindMapState>()(
     selectedNodeIds: [],
     editingNodeId: null,
     viewport: { x: 0, y: 0, zoom: 1 },
+    viewportInitialized: false,
     theme: 'light',
     language: 'en' as Lang,
     isDirty: false,
@@ -217,6 +281,10 @@ export const useMindMapStore = create<MindMapState>()(
     sketchMode: false,
     searchQuery: '',
     searchResultIds: [],
+
+    activeTabId: initialTabId,
+    tabOrder: [initialTabId],
+    tabs: {},
 
     onNodesChange: (changes) => {
       set((state) => {
@@ -247,7 +315,7 @@ export const useMindMapStore = create<MindMapState>()(
       get().pushHistory();
     },
 
-    setViewport: (viewport) => set((state) => { state.viewport = viewport; }),
+    setViewport: (viewport) => set((state) => { state.viewport = viewport; state.viewportInitialized = true; }),
 
     addChildNode: (parentId) => {
       const { nodes, edges, defaultEdgeData } = get();
@@ -414,9 +482,11 @@ export const useMindMapStore = create<MindMapState>()(
     setCurrentFilePath: (path) => set((state) => { state.currentFilePath = path; }),
     setIsDirty: (dirty) => set((state) => { state.isDirty = dirty; }),
 
-    loadMap: (nodes, edges, title, theme = 'light') => {
+    loadMap: (nodes, edges, title, theme = 'light', viewport) => {
       set((state) => {
         state.nodes = nodes; state.edges = edges; state.mapTitle = title; state.theme = theme;
+        state.viewport = viewport ?? { x: 0, y: 0, zoom: 1 };
+        state.viewportInitialized = !!viewport;
         state.isDirty = false; state.selectedNodeIds = []; state.editingNodeId = null;
         state.currentStyleId = 'klasicky'; // reset to default; overridden by applyStylePreset if file has styleId
         state.history = [{ nodes: JSON.parse(JSON.stringify(nodes)), edges: JSON.parse(JSON.stringify(edges)) }];
@@ -429,8 +499,83 @@ export const useMindMapStore = create<MindMapState>()(
       set((state) => {
         state.nodes = [root]; state.edges = []; state.mapTitle = getT(get().language).defaults.mapTitle;
         state.isDirty = false; state.currentFilePath = null;
+        state.viewport = { x: 0, y: 0, zoom: 1 }; state.viewportInitialized = false;
         state.selectedNodeIds = []; state.editingNodeId = null;
         state.history = [{ nodes: [root], edges: [] }]; state.historyIndex = 0;
+      });
+    },
+
+    openNewTab: () => {
+      const currentId = get().activeTabId;
+      const newId = uuidv4();
+      set((state) => {
+        state.tabs[currentId] = snapshotFromState(state);
+        state.tabOrder.push(newId);
+        state.activeTabId = newId;
+      });
+      get().newMap();
+      return newId;
+    },
+
+    loadMapInNewTab: ({ nodes, edges, title, theme, viewport, filePath, styleId }) => {
+      const currentId = get().activeTabId;
+      const newId = uuidv4();
+      set((state) => {
+        state.tabs[currentId] = snapshotFromState(state);
+        state.tabOrder.push(newId);
+        state.activeTabId = newId;
+      });
+      get().loadMap(nodes, edges, title, theme, viewport);
+      if (styleId) get().applyStylePreset(styleId);
+      if (filePath !== undefined) get().setCurrentFilePath(filePath);
+      return newId;
+    },
+
+    switchTab: (tabId) => {
+      const { activeTabId, tabs } = get();
+      if (tabId === activeTabId) return;
+      const target = tabs[tabId];
+      if (!target) return;
+      set((state) => {
+        state.tabs[activeTabId] = snapshotFromState(state);
+        state.nodes = target.nodes; state.edges = target.edges;
+        state.selectedNodeIds = target.selectedNodeIds; state.editingNodeId = target.editingNodeId;
+        state.viewport = target.viewport; state.viewportInitialized = target.viewportInitialized;
+        state.isDirty = target.isDirty; state.currentFilePath = target.currentFilePath;
+        state.mapTitle = target.mapTitle; state.history = target.history; state.historyIndex = target.historyIndex;
+        state.defaultEdgeData = target.defaultEdgeData; state.currentStyleId = target.currentStyleId;
+        state.sketchMode = target.sketchMode; state.searchQuery = target.searchQuery;
+        state.searchResultIds = target.searchResultIds;
+        delete state.tabs[tabId];
+        state.activeTabId = tabId;
+      });
+    },
+
+    closeTab: (tabId) => {
+      const { tabOrder } = get();
+      if (!tabOrder.includes(tabId)) return;
+
+      if (tabOrder.length === 1) {
+        const newId = uuidv4();
+        set((state) => { state.tabs = {}; state.tabOrder = [newId]; state.activeTabId = newId; });
+        get().newMap();
+        return;
+      }
+
+      if (tabId !== get().activeTabId) {
+        set((state) => {
+          delete state.tabs[tabId];
+          state.tabOrder = state.tabOrder.filter((id) => id !== tabId);
+        });
+        return;
+      }
+
+      const idx = tabOrder.indexOf(tabId);
+      const neighborId = tabOrder[idx + 1] ?? tabOrder[idx - 1];
+      get().switchTab(neighborId);
+      set((state) => {
+        delete state.tabs[tabId];
+        state.tabOrder = state.tabOrder.filter((id) => id !== tabId);
       });
     },
 
