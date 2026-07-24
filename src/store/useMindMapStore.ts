@@ -25,6 +25,7 @@ import {
 } from '../types/mindmap';
 import { getT, type Lang } from '../i18n';
 import { MAP_STYLE_PRESETS } from '../types/styles';
+import { COLOR_PALETTES } from '../types/palettes';
 import { computeLayout, LayoutDirection } from '../utils/autoLayout';
 
 type MindNode = Node<MindMapNodeData>;
@@ -105,6 +106,7 @@ interface MindMapState {
 
   // Style presets
   applyStylePreset: (styleId: string, applyColors?: boolean) => void;
+  applyColorPalette: (paletteId: string) => void;
 
   // Free objects & groups
   addGroup: (position?: { x: number; y: number }) => string;
@@ -130,6 +132,30 @@ function getNodeDepth(nodeId: string, edges: MindEdge[]): number {
     depth++;
   }
   return depth;
+}
+
+// Walks up from nodeId to find the direct child of rootId it descends from
+// (i.e. which main branch it belongs to). Returns null for the root itself.
+function getBranchAncestorId(nodeId: string, rootId: string, edges: MindEdge[]): string | null {
+  if (nodeId === rootId) return null;
+  let current = nodeId;
+  for (let i = 0; i < 30; i++) {
+    const parentEdge = edges.find((e) => e.target === current);
+    if (!parentEdge) return current;
+    if (parentEdge.source === rootId) return current;
+    current = parentEdge.source;
+  }
+  return current;
+}
+
+function contrastTextColor(hex: string): string {
+  const c = hex.replace('#', '');
+  if (c.length !== 6) return '#1e293b';
+  const r = parseInt(c.slice(0, 2), 16);
+  const g = parseInt(c.slice(2, 4), 16);
+  const b = parseInt(c.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6 ? '#1e293b' : '#ffffff';
 }
 
 function getChildPosition(
@@ -498,6 +524,46 @@ export const useMindMapStore = create<MindMapState>()(
             (node.data as MindMapNodeData).backgroundColor = color;
             (node.data as MindMapNodeData).textColor = depth <= 1 ? '#ffffff' : (node.data as MindMapNodeData).textColor;
           }
+        });
+
+        state.isDirty = true;
+      });
+      get().pushHistory();
+    },
+
+    applyColorPalette: (paletteId) => {
+      const palette = COLOR_PALETTES.find((p) => p.id === paletteId);
+      if (!palette) return;
+
+      set((state) => {
+        const root = state.nodes.find((n) => (n.data as MindMapNodeData).isRoot);
+        if (!root) return;
+
+        const directChildIds = state.edges
+          .filter((e) => e.source === root.id)
+          .map((e) => e.target);
+
+        const branchColors = new Map<string, string>();
+        directChildIds.forEach((id, i) => {
+          branchColors.set(id, palette.colors[i % palette.colors.length]);
+        });
+
+        state.nodes.forEach((node) => {
+          if (node.id === root.id) return;
+          const branchId = getBranchAncestorId(node.id, root.id, state.edges);
+          const color = branchId ? branchColors.get(branchId) : undefined;
+          if (!color) return;
+          const data = node.data as MindMapNodeData;
+          data.backgroundColor = color;
+          data.textColor = contrastTextColor(color);
+          data.borderColor = `color-mix(in srgb, ${color} 70%, black)`;
+        });
+
+        state.edges.forEach((edge) => {
+          const branchId = getBranchAncestorId(edge.target, root.id, state.edges);
+          const color = branchId ? branchColors.get(branchId) : undefined;
+          if (!color || !edge.data) return;
+          (edge.data as MindMapEdgeData).color = color;
         });
 
         state.isDirty = true;

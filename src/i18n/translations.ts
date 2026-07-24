@@ -35,7 +35,7 @@ export interface Translations {
     nodeIcon: string; nodeImage: string; changeImage: string; insertImage: string;
     checklist: string; clearChecklist: string; addChecklistItem: string;
     nodeEdges: string; customColor: string; imageFilter: string;
-    applyColors: string; defaultBadge: string;
+    applyColors: string; defaultBadge: string; colorPalette: string;
   };
   shapes: { rounded: string; rectangle: string; ellipse: string; circle: string; pill: string };
   help: { title: string; shortcuts: { keys: string[]; desc: string }[] };
@@ -49,6 +49,7 @@ export interface Translations {
   node: { addChild: string; expand: string; collapse: string; newItem: string; addItem: string; remove: string; toggleNote: string; notePlaceholder: string; noteLabel: string; urlLabel: string; urlPlaceholder: string; openUrl: string };
   defaults: { rootLabel: string; newNode: string; mapTitle: string; freeText: string; group: string };
   presets: Record<string, { name: string; description: string }>;
+  palettes: Record<string, { name: string }>;
 }
 
 const en: Translations = {
@@ -88,6 +89,7 @@ const en: Translations = {
     insertImage: 'Insert image', checklist: 'Checklist', clearChecklist: 'Clear',
     addChecklistItem: 'Add item', nodeEdges: 'Edges from node',
     customColor: 'Custom color', imageFilter: 'Image', applyColors: 'Change colors', defaultBadge: 'default',
+    colorPalette: 'Color palette',
   },
   shapes: {
     rounded: '⬜ Rounded', rectangle: '🔲 Rect', ellipse: '⭕ Ellipse',
@@ -138,6 +140,14 @@ const en: Translations = {
     nakresleno:    { name: 'Sketch',        description: 'Hand-drawn style like Excalidraw' },
     minimalista:   { name: 'Minimalist',    description: 'Clean lines, no borders, pastel' },
   },
+  palettes: {
+    vivid:      { name: 'Vivid' },
+    pastel:     { name: 'Pastel' },
+    ocean:      { name: 'Ocean' },
+    sunset:     { name: 'Sunset' },
+    earth:      { name: 'Earth' },
+    monochrome: { name: 'Monochrome Blue' },
+  },
 };
 
 const cs: Translations = {
@@ -177,6 +187,7 @@ const cs: Translations = {
     insertImage: 'Vložit obrázek', checklist: 'Zaškrtávací seznam', clearChecklist: 'Vymazat',
     addChecklistItem: 'Přidat položku', nodeEdges: 'Hrany od uzlu',
     customColor: 'Vlastní barva', imageFilter: 'Obrázek', applyColors: 'Změnit barvy', defaultBadge: 'výchozí',
+    colorPalette: 'Barevná paleta',
   },
   shapes: {
     rounded: '⬜ Oblé', rectangle: '🔲 Rect', ellipse: '⭕ Elipsa',
@@ -226,6 +237,14 @@ const cs: Translations = {
     bublinovy:     { name: 'Bublinový',      description: 'Elipsy, duhové barvy dle větve' },
     nakresleno:    { name: 'Nakresleno',     description: 'Ručně kreslený styl jako Excalidraw' },
     minimalista:   { name: 'Minimalistický', description: 'Čisté linie, bez rámečků, pastelové' },
+  },
+  palettes: {
+    vivid:      { name: 'Sytá' },
+    pastel:     { name: 'Pastelová' },
+    ocean:      { name: 'Oceán' },
+    sunset:     { name: 'Západ slunce' },
+    earth:      { name: 'Zemitá' },
+    monochrome: { name: 'Jednobarevná modrá' },
   },
 };
 

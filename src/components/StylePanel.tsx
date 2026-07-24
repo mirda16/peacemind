@@ -5,6 +5,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { useMindMapStore } from '../store/useMindMapStore';
 import { MindMapNodeData, NodeShape } from '../types/mindmap';
 import { MAP_STYLE_PRESETS } from '../types/styles';
+import { COLOR_PALETTES } from '../types/palettes';
 import { useT } from '../i18n';
 import IconPicker from './IconPicker';
 
@@ -79,6 +80,46 @@ function StylePresetsSection() {
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--pm-text-muted)' }}>{pt.description}</div>
               </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ColorPaletteSection() {
+  const t = useT();
+  const applyColorPalette = useMindMapStore((s) => s.applyColorPalette);
+
+  return (
+    <div className="pm-panel-section">
+      <SectionLabel>{t.panel.colorPalette}</SectionLabel>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {COLOR_PALETTES.map((palette) => {
+          const name = t.palettes[palette.id]?.name ?? palette.name;
+          return (
+            <button
+              key={palette.id}
+              onClick={() => applyColorPalette(palette.id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '8px 12px', borderRadius: 8,
+                border: '1px solid var(--pm-border)', background: 'var(--pm-bg)',
+                cursor: 'pointer', textAlign: 'left', color: 'var(--pm-text)',
+              }}
+              title={name}
+            >
+              <div style={{ display: 'flex', flexShrink: 0 }}>
+                {palette.colors.map((c, i) => (
+                  <div key={i} style={{
+                    width: 14, height: 14, borderRadius: '50%',
+                    background: c, marginLeft: i === 0 ? 0 : -4,
+                    border: '1px solid var(--pm-surface)',
+                  }} />
+                ))}
+              </div>
+              <span style={{ fontWeight: 600, fontSize: 13 }}>{name}</span>
             </button>
           );
         })}
@@ -412,6 +453,8 @@ export default function StylePanel() {
   return (
     <div className="pm-panel">
       <StylePresetsSection />
+      <div style={{ height: 1, background: 'var(--pm-border)', margin: '4px 0' }} />
+      <ColorPaletteSection />
       <div style={{ height: 1, background: 'var(--pm-border)', margin: '4px 0' }} />
       {selectedNodeIds.length > 0 ? <NodeStyleSection /> : <GlobalEdgeSection />}
     </div>
