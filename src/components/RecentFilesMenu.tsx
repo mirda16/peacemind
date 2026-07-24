@@ -7,11 +7,7 @@ import { getRecentFiles, removeRecentFile, RecentFile } from '../hooks/useRecent
 import { pushRecentFile } from '../hooks/useRecentFiles';
 import { useT } from '../i18n';
 
-interface Props {
-  onConfirmDirty: () => boolean;
-}
-
-export default function RecentFilesMenu({ onConfirmDirty }: Props) {
+export default function RecentFilesMenu() {
   const t = useT();
   const store = useMindMapStore();
   const [open, setOpen] = useState(false);
@@ -33,13 +29,13 @@ export default function RecentFilesMenu({ onConfirmDirty }: Props) {
 
   const openFile = async (file: RecentFile) => {
     setOpen(false);
-    if (!onConfirmDirty()) return;
     try {
       const raw = await invoke<string>('read_file', { path: file.path });
       const data: PeaceMindFile = JSON.parse(raw);
-      store.loadMap(data.nodes, data.edges, data.title, data.theme);
-      if (data.styleId) store.applyStylePreset(data.styleId);
-      store.setCurrentFilePath(file.path);
+      store.loadMapInNewTab({
+        nodes: data.nodes, edges: data.edges, title: data.title,
+        theme: data.theme, viewport: data.viewport, filePath: file.path, styleId: data.styleId,
+      });
       pushRecentFile({ path: file.path, title: data.title, savedAt: data.updatedAt });
     } catch {
       removeRecentFile(file.path);

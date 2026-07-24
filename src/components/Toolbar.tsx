@@ -31,7 +31,7 @@ export default function Toolbar({ onShowExport, onShowTemplates }: Props) {
   const redo = useMindMapStore((s) => s.redo);
   const canUndo = useMindMapStore((s) => s.canUndo());
   const canRedo = useMindMapStore((s) => s.canRedo());
-  const newMap = useMindMapStore((s) => s.newMap);
+  const openNewTab = useMindMapStore((s) => s.openNewTab);
 
   const addGroup       = useMindMapStore((s) => s.addGroup);
   const addFreeText    = useMindMapStore((s) => s.addFreeText);
@@ -78,13 +78,7 @@ export default function Toolbar({ onShowExport, onShowTemplates }: Props) {
     setEditingTitle(false);
   };
 
-  const handleNewMap = () => {
-    if (isDirty && !confirm(t.toolbar.confirmNew)) return;
-    newMap();
-  };
-
   const handleOpen = async () => {
-    if (isDirty && !confirm(t.toolbar.confirmOpen)) return;
     await openMap();
   };
 
@@ -98,7 +92,7 @@ export default function Toolbar({ onShowExport, onShowTemplates }: Props) {
       <div className="pm-toolbar-sep" />
 
       {/* File ops */}
-      <button className="pm-toolbar-btn" onClick={handleNewMap} title={t.toolbar.newTooltip}>
+      <button className="pm-toolbar-btn" onClick={() => openNewTab()} title={t.toolbar.newTooltip}>
         <FilePlus size={16} /> <span>{t.toolbar.new}</span>
       </button>
       <button className="pm-toolbar-btn" onClick={onShowTemplates} title={t.toolbar.templates}>
@@ -107,10 +101,7 @@ export default function Toolbar({ onShowExport, onShowTemplates }: Props) {
       <button className="pm-toolbar-btn" onClick={handleOpen} title={t.toolbar.openTooltip}>
         <FolderOpen size={16} /> <span>{t.toolbar.open}</span>
       </button>
-      <RecentFilesMenu onConfirmDirty={() => {
-        if (!isDirty) return true;
-        return confirm(t.toolbar.confirmOpen);
-      }} />
+      <RecentFilesMenu />
       <button className="pm-toolbar-btn" onClick={() => saveMap()} title={t.toolbar.saveTooltip}>
         <Save size={16} /> <span>{t.toolbar.save}</span>
       </button>

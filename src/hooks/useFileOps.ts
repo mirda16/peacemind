@@ -53,9 +53,10 @@ export function useFileOps() {
     try {
       const raw = await invoke<string>('read_file', { path: filePath });
       const data: PeaceMindFile = JSON.parse(raw);
-      store.loadMap(data.nodes, data.edges, data.title, data.theme);
-      if (data.styleId) store.applyStylePreset(data.styleId);
-      store.setCurrentFilePath(filePath);
+      store.loadMapInNewTab({
+        nodes: data.nodes, edges: data.edges, title: data.title,
+        theme: data.theme, viewport: data.viewport, filePath, styleId: data.styleId,
+      });
       pushRecentFile({ path: filePath, title: data.title, savedAt: data.updatedAt });
       return true;
     } catch (e) {
