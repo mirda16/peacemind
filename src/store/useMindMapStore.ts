@@ -538,8 +538,10 @@ export const useMindMapStore = create<MindMapState>()(
       if (!target) return;
       set((state) => {
         state.tabs[activeTabId] = snapshotFromState(state);
-        state.nodes = target.nodes; state.edges = target.edges;
-        state.selectedNodeIds = target.selectedNodeIds; state.editingNodeId = target.editingNodeId;
+        // Selection/editing state is not restored on purpose (see comment below).
+        state.nodes = target.nodes.map((n) => n.selected ? { ...n, selected: false } : n);
+        state.edges = target.edges;
+        state.selectedNodeIds = []; state.editingNodeId = null;
         state.viewport = target.viewport; state.viewportInitialized = target.viewportInitialized;
         state.isDirty = target.isDirty; state.currentFilePath = target.currentFilePath;
         state.mapTitle = target.mapTitle; state.history = target.history; state.historyIndex = target.historyIndex;
