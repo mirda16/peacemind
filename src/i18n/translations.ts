@@ -50,6 +50,7 @@ export interface Translations {
   defaults: { rootLabel: string; newNode: string; mapTitle: string; freeText: string; group: string };
   presets: Record<string, { name: string; description: string }>;
   palettes: Record<string, { name: string }>;
+  tabs: { newTab: string; closeTab: string; confirmClose: string };
 }
 
 const en: Translations = {
@@ -148,6 +149,10 @@ const en: Translations = {
     earth:      { name: 'Earth' },
     monochrome: { name: 'Monochrome Blue' },
   },
+  tabs: {
+    newTab: 'New tab', closeTab: 'Close tab',
+    confirmClose: 'This tab has unsaved changes. Close anyway?',
+  },
 };
 
 const cs: Translations = {
@@ -245,6 +250,10 @@ const cs: Translations = {
     sunset:     { name: 'Západ slunce' },
     earth:      { name: 'Zemitá' },
     monochrome: { name: 'Jednobarevná modrá' },
+  },
+  tabs: {
+    newTab: 'Nová záložka', closeTab: 'Zavřít záložku',
+    confirmClose: 'Tato záložka má neuložené změny. Přesto zavřít?',
   },
 };
 
