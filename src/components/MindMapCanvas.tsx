@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ReactFlow,
   Background,
@@ -50,6 +50,12 @@ export default function MindMapCanvas({ onContextMenu }: Props) {
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { fitView, setCenter, getZoom } = useReactFlow();
+
+  // Captured once at mount (this component remounts per-tab via a `key` prop),
+  // so switching back to a previously-viewed tab restores its exact pan/zoom.
+  const [{ viewport: mountViewport, viewportInitialized: mountViewportInitialized }] = useState(
+    () => useMindMapStore.getState()
+  );
 
   // Refocus canvas after finishing node edit so keyboard shortcuts (Enter, Tab) work again
   useEffect(() => {
@@ -213,8 +219,9 @@ export default function MindMapCanvas({ onContextMenu }: Props) {
         onNodeContextMenu={handleNodeContextMenu}
         onPaneContextMenu={handlePaneContextMenu}
         onMoveEnd={(_, viewport) => setViewport(viewport)}
-        fitView
-        fitViewOptions={{ padding: 0.3, maxZoom: 0.75 }}
+        {...(mountViewportInitialized
+          ? { defaultViewport: mountViewport }
+          : { fitView: true, fitViewOptions: { padding: 0.3, maxZoom: 0.75 } })}
         minZoom={0.05}
         maxZoom={5}
         elevateNodesOnSelect={false}

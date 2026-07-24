@@ -3,6 +3,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { useMindMapStore } from './store/useMindMapStore';
 import MindMapCanvas from './components/MindMapCanvas';
 import Toolbar from './components/Toolbar';
+import TabBar from './components/TabBar';
 import StylePanel from './components/StylePanel';
 import ExportDialog from './components/ExportDialog';
 import ContextMenu from './components/ContextMenu';
@@ -19,7 +20,8 @@ interface CtxMenu {
 
 export default function App() {
   const theme = useMindMapStore((s) => s.theme);
-  const newMap = useMindMapStore((s) => s.newMap);
+  const activeTabId = useMindMapStore((s) => s.activeTabId);
+  const openNewTab = useMindMapStore((s) => s.openNewTab);
   const isDirty = useMindMapStore((s) => s.isDirty);
   const sketchMode = useMindMapStore((s) => s.sketchMode);
 
@@ -56,8 +58,7 @@ export default function App() {
       }
       if (e.key === 'n') {
         e.preventDefault();
-        if (isDirty && !confirm('Mapa má neuložené změny. Přesto vytvořit novou?')) return;
-        newMap();
+        openNewTab();
       }
       if (e.key === 'e') {
         e.preventDefault();
@@ -70,7 +71,7 @@ export default function App() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [saveMap, openMap, newMap, isDirty]);
+  }, [saveMap, openMap, openNewTab, isDirty]);
 
   const handleContextMenu = (e: React.MouseEvent, nodeId?: string) => {
     e.preventDefault();
@@ -81,9 +82,10 @@ export default function App() {
     <ReactFlowProvider>
       <div className={sketchMode ? 'pm-sketch-mode' : undefined} style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
         <Toolbar onShowExport={() => setShowExport(true)} onShowTemplates={() => setShowTemplates(true)} />
+        <TabBar />
 
         <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
-          <MindMapCanvas onContextMenu={handleContextMenu} />
+          <MindMapCanvas key={activeTabId} onContextMenu={handleContextMenu} />
           {showSearch && <SearchBar onClose={closeSearch} />}
           <StylePanel />
         </div>

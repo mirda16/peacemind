@@ -435,6 +435,78 @@ body,
   margin: 0 4px;
 }
 
+/* Tab bar */
+.pm-tabbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--pm-toolbar-bg);
+  border-bottom: 1px solid var(--pm-border);
+  height: 34px;
+  padding: 0 8px;
+  overflow-x: auto;
+}
+
+.pm-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px 6px 0 0;
+  font-size: 12px;
+  color: var(--pm-text-muted);
+  cursor: pointer;
+  max-width: 180px;
+  white-space: nowrap;
+}
+
+.pm-tab-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pm-tab.active {
+  background: var(--pm-bg);
+  color: var(--pm-text);
+  font-weight: 600;
+}
+
+.pm-tab:hover {
+  background: var(--pm-bg);
+}
+
+.pm-tab-dirty-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pm-accent);
+  flex-shrink: 0;
+}
+
+.pm-tab-close {
+  display: flex;
+  padding: 2px;
+  border-radius: 4px;
+  opacity: 0.6;
+}
+
+.pm-tab-close:hover {
+  opacity: 1;
+  background: var(--pm-border);
+}
+
+.pm-tab-add {
+  display: flex;
+  padding: 4px 6px;
+  border-radius: 6px;
+  color: var(--pm-text-muted);
+}
+
+.pm-tab-add:hover {
+  background: var(--pm-bg);
+  color: var(--pm-text);
+}
+
 /* Style panel */
 .pm-panel {
   background: var(--pm-panel-bg);
