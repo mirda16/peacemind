@@ -52,6 +52,7 @@ interface TabSnapshot {
   historyIndex: number;
   defaultEdgeData: MindMapEdgeData;
   currentStyleId: string;
+  currentPaletteId: string | null;
   sketchMode: boolean;
   searchQuery: string;
   searchResultIds: string[];
@@ -73,6 +74,9 @@ interface MindMapState {
   historyIndex: number;
   defaultEdgeData: MindMapEdgeData;
   currentStyleId: string;
+  // Palette last applied via applyColorPalette, so newly added nodes can keep
+  // matching it — null once no palette is "active" (e.g. after a fresh map).
+  currentPaletteId: string | null;
   showNotes: boolean;
   sketchMode: boolean;
   searchQuery: string;
@@ -204,6 +208,7 @@ function snapshotFromState(state: MindMapState): TabSnapshot {
     historyIndex: state.historyIndex,
     defaultEdgeData: state.defaultEdgeData,
     currentStyleId: state.currentStyleId,
+    currentPaletteId: state.currentPaletteId,
     sketchMode: state.sketchMode,
     searchQuery: state.searchQuery,
     searchResultIds: state.searchResultIds,
@@ -277,6 +282,7 @@ export const useMindMapStore = create<MindMapState>()(
     historyIndex: 0,
     defaultEdgeData: { ...DEFAULT_EDGE_DATA },
     currentStyleId: 'klasicky',
+    currentPaletteId: null,
     showNotes: false,
     sketchMode: false,
     searchQuery: '',
@@ -347,6 +353,28 @@ export const useMindMapStore = create<MindMapState>()(
       if (preset?.levelEdgeColors) {
         const ec = preset.levelEdgeColors[Math.min(depth - 1, preset.levelEdgeColors.length - 1)];
         edgeColorData = { ...edgeColorData, color: ec };
+      }
+
+      // If a color palette was applied (applyColorPalette), keep new nodes on
+      // it instead of falling back to the style preset's plain childNode
+      // color — otherwise every node added after picking a palette looked
+      // like it belonged to a different map.
+      const paletteId = get().currentPaletteId;
+      const palette = paletteId ? COLOR_PALETTES.find((p) => p.id === paletteId) : undefined;
+      if (palette) {
+        const root = nodes.find((n) => (n.data as MindMapNodeData).isRoot);
+        // A new child of the root starts its own branch — give it the next
+        // color in rotation, same as applyColorPalette would. Anywhere
+        // deeper, just continue the parent's branch color.
+        const color = root && parentId === root.id
+          ? palette.colors[edges.filter((e) => e.source === root.id).length % palette.colors.length]
+          : parentData.backgroundColor;
+        if (color) {
+          nodeData.backgroundColor = color;
+          nodeData.textColor = contrastTextColor(color);
+          nodeData.borderColor = `color-mix(in srgb, ${color} 70%, black)`;
+          edgeColorData = { ...edgeColorData, color };
+        }
       }
 
       const newNode: MindNode = { id: newId, type: 'mindMapNode', position, data: nodeData };
@@ -489,6 +517,7 @@ export const useMindMapStore = create<MindMapState>()(
         state.viewportInitialized = !!viewport;
         state.isDirty = false; state.selectedNodeIds = []; state.editingNodeId = null;
         state.currentStyleId = 'klasicky'; // reset to default; overridden by applyStylePreset if file has styleId
+        state.currentPaletteId = null;
         state.history = [{ nodes: JSON.parse(JSON.stringify(nodes)), edges: JSON.parse(JSON.stringify(edges)) }];
         state.historyIndex = 0;
       });
@@ -501,6 +530,7 @@ export const useMindMapStore = create<MindMapState>()(
         state.isDirty = false; state.currentFilePath = null;
         state.viewport = { x: 0, y: 0, zoom: 1 }; state.viewportInitialized = false;
         state.selectedNodeIds = []; state.editingNodeId = null;
+        state.currentPaletteId = null;
         state.history = [{ nodes: [root], edges: [] }]; state.historyIndex = 0;
       });
     },
@@ -546,6 +576,7 @@ export const useMindMapStore = create<MindMapState>()(
         state.isDirty = target.isDirty; state.currentFilePath = target.currentFilePath;
         state.mapTitle = target.mapTitle; state.history = target.history; state.historyIndex = target.historyIndex;
         state.defaultEdgeData = target.defaultEdgeData; state.currentStyleId = target.currentStyleId;
+        state.currentPaletteId = target.currentPaletteId;
         state.sketchMode = target.sketchMode; state.searchQuery = target.searchQuery;
         state.searchResultIds = target.searchResultIds;
         delete state.tabs[tabId];
@@ -695,6 +726,16 @@ export const useMindMapStore = create<MindMapState>()(
           branchColors.set(id, palette.colors[i % palette.colors.length]);
         });
 
+        // The root isn't part of any branch, so it fell through the loop
+        // below untouched — applying a palette left it in the old style's
+        // color while every other node changed. Give it the palette's first
+        // color so the whole map visibly reflects the chosen palette.
+        const rootColor = palette.colors[0];
+        const rootData = root.data as MindMapNodeData;
+        rootData.backgroundColor = rootColor;
+        rootData.textColor = contrastTextColor(rootColor);
+        rootData.borderColor = `color-mix(in srgb, ${rootColor} 70%, black)`;
+
         state.nodes.forEach((node) => {
           if (node.id === root.id) return;
           const branchId = getBranchAncestorId(node.id, root.id, state.edges);
@@ -713,6 +754,7 @@ export const useMindMapStore = create<MindMapState>()(
           (edge.data as MindMapEdgeData).color = color;
         });
 
+        state.currentPaletteId = paletteId;
         state.isDirty = true;
       });
       get().pushHistory();
