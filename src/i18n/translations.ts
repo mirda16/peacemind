@@ -140,6 +140,7 @@ const en: Translations = {
     bublinovy:     { name: 'Bubble',        description: 'Ellipses, rainbow colors per branch' },
     nakresleno:    { name: 'Sketch',        description: 'Hand-drawn style like Excalidraw' },
     minimalista:   { name: 'Minimalist',    description: 'Clean lines, no borders, pastel' },
+    moderni:       { name: 'Modern',        description: 'Clean lines, soft grays, Apple-inspired' },
   },
   palettes: {
     vivid:      { name: 'Vivid' },
@@ -242,6 +243,7 @@ const cs: Translations = {
     bublinovy:     { name: 'Bublinový',      description: 'Elipsy, duhové barvy dle větve' },
     nakresleno:    { name: 'Nakresleno',     description: 'Ručně kreslený styl jako Excalidraw' },
     minimalista:   { name: 'Minimalistický', description: 'Čisté linie, bez rámečků, pastelové' },
+    moderni:       { name: 'Moderní',        description: 'Čisté linie, jemné šedé tóny, v duchu Apple designu' },
   },
   palettes: {
     vivid:      { name: 'Sytá' },
