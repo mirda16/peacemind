@@ -55,7 +55,7 @@ export default function Toolbar({ onShowExport, onShowTemplates }: Props) {
   const applyLayout = (dir: LayoutDirection) => {
     autoLayout(dir);
     setLayoutOpen(false);
-    setTimeout(() => fitView({ duration: 400, padding: 0.3 }), 50);
+    setTimeout(() => fitView({ duration: 400, padding: '30%' }), 50);
   };
 
   const { saveMap, openMap } = useFileOps();
@@ -125,7 +125,7 @@ export default function Toolbar({ onShowExport, onShowTemplates }: Props) {
       <button className="pm-toolbar-btn" onClick={() => zoomOut({ duration: 200 })} title={t.toolbar.zoomOut}>
         <ZoomOut size={16} />
       </button>
-      <button className="pm-toolbar-btn" onClick={() => fitView({ duration: 300, padding: 0.3 })} title={t.toolbar.fitView}>
+      <button className="pm-toolbar-btn" onClick={() => fitView({ duration: 300, padding: '30%' })} title={t.toolbar.fitView}>
         <Maximize2 size={16} />
       </button>
 

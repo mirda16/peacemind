@@ -4,13 +4,12 @@ import {
   Node,
   Edge,
   addEdge,
-  applyNodeChanges,
-  applyEdgeChanges,
-  NodeChange,
-  EdgeChange,
   Connection,
   Viewport,
 } from '@xyflow/react';
+import type { NodeChangeset, EdgeChangeset } from '@xyflow/react';
+// @xyflow/react v13 no longer re-exports these two — only @xyflow/system does.
+import { applyNodeChanges, applyEdgeChanges } from '@xyflow/system';
 import { v4 as uuidv4 } from 'uuid';
 import {
   MindMapNodeData,
@@ -88,8 +87,8 @@ interface MindMapState {
   tabs: Record<string, TabSnapshot>;
 
   // Flow callbacks
-  onNodesChange: (changes: NodeChange[]) => void;
-  onEdgesChange: (changes: EdgeChange[]) => void;
+  onNodesChange: (changes: NodeChangeset<MindNode>) => void;
+  onEdgesChange: (changes: EdgeChangeset<MindEdge>) => void;
   onConnect: (connection: Connection) => void;
   setViewport: (viewport: Viewport) => void;
 
@@ -294,9 +293,11 @@ export const useMindMapStore = create<MindMapState>()(
 
     onNodesChange: (changes) => {
       set((state) => {
-        state.nodes = applyNodeChanges(changes, state.nodes) as MindNode[];
+        state.nodes = applyNodeChanges(state.nodes, changes) as MindNode[];
       });
-      const posChanges = changes.filter((c) => c.type === 'position' && c.dragging === false);
+      // v13's changeset replaces the plain array it used to hand us — pull
+      // position changes out via getByType instead of Array#filter.
+      const posChanges = changes.getByType('position').filter((c) => c.dragging === false);
       if (posChanges.length > 0) {
         get().pushHistory();
         set((state) => { state.isDirty = true; });
@@ -305,7 +306,7 @@ export const useMindMapStore = create<MindMapState>()(
 
     onEdgesChange: (changes) => {
       set((state) => {
-        state.edges = applyEdgeChanges(changes, state.edges) as MindEdge[];
+        state.edges = applyEdgeChanges(state.edges, changes) as MindEdge[];
       });
     },
 

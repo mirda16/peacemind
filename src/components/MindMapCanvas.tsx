@@ -221,7 +221,7 @@ export default function MindMapCanvas({ onContextMenu }: Props) {
         onMoveEnd={(_, viewport) => setViewport(viewport)}
         {...(mountViewportInitialized
           ? { defaultViewport: mountViewport }
-          : { fitView: true, fitViewOptions: { padding: 0.3, maxZoom: 0.75 } })}
+          : { fitView: true, fitViewOptions: { padding: '30%', maxZoom: 0.75 } })}
         minZoom={0.05}
         maxZoom={5}
         elevateNodesOnSelect={false}
